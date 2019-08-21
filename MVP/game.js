@@ -1,7 +1,10 @@
-var width = 400;
-var height = 400;
+// 小游戏入口
+import './libs/weapp-adapter'
+import * as THREE from './libs/three'
 
-var canvas = document.getElementById("demo-canvas");
+var width = 375;
+var height = 667;
+
 var renderer = new THREE.WebGLRenderer({
   canvas: canvas
 })
@@ -10,8 +13,8 @@ var scene = new THREE.Scene()
 // 使用正交相机（没有透视效果）,定义空间范围（上下左右前后）
 var camera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, -1000, 1000)
 
-renderer.setClearColor(new THREE.Color(0x000000, 1.0))
-renderer.setSize(400, 400)
+renderer.setClearColor(new THREE.Color(0x000000))
+renderer.setSize(width, height)
 
 // 创建一个 Shap Geometries（几何形状）
 var triangleShape = new THREE.Shape()

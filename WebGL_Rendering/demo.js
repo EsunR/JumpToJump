@@ -103,7 +103,7 @@ function animate() {
   var now = Date.now()
   var duration = now - g_last
   g_last = now
-  // 计算当前时间下的图形旋转角度
+  // 计算当前时间下的图形旋转角度(图形会每秒旋转180°)
   currentAngle = currentAngle + duration / 1000 * 180
 }
 
