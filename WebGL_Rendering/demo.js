@@ -8,8 +8,10 @@ var VSHADER_SOURCE, FSHADER_SOURCE
 VSHADER_SOURCE = `
   attribute vec4 a_Position;
   uniform mat4 u_ModelMatrix;
+  uniform mat4 u_ViewMatrix;
+  uniform mat4 u_ProjectionMatrix;
   void main(){
-    gl_Position = a_Position * u_ModelMatrix;
+    gl_Position = a_Position * u_ViewMatrix * u_ModelMatrix * u_ProjectionMatrix;
   }
 `
 
@@ -84,15 +86,28 @@ function initVertexBuffers(gl) {
 var n = initVertexBuffers(gl)
 gl.clearColor(0, 0, 0, 1)
 
-// 将旋转矩阵传入到 u_ModelMatrix 常量中
+// 获取旋转矩阵
 var u_ModelMatrix = gl.getUniformLocation(gl.program, 'u_ModelMatrix')
 var modelMatrix = new Matrix4()
+
+// 获取视图矩阵
+var u_ViewMatrix = gl.getUniformLocation(gl.program, 'u_ViewMatrix')
+var viewMatrix = new Matrix4()
+viewMatrix.lookAt(0.1, 0.1, 0.1, 0, 0, 0, 0, 1, 0)
+
+var u_ProjectionMatrix = gl.getUniformLocation(gl.program, 'u_ProjectionMatrix')
+var projectionMatrix = new Matrix4()
+// projectionMatrix.perspective(120, 1, 0.1, 1000)
+projectionMatrix.ortho(-1, 1, -1, 1, 0.1, 1000)
+
 
 // 绘制
 function draw() {
   // 计算旋转角度后的点坐标
   modelMatrix.setRotate(currentAngle, 0, 1, 0)
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements)
+  gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements)
+  gl.uniformMatrix4fv(u_ProjectionMatrix, false, projectionMatrix.elements)
   // 调用clear方法将当前绘制结果清空
   gl.clear(gl.COLOR_BUFFER_BIT)
   // 按照三角形的图源去绘制，从 buffer 的起始位获取数据，绘制 n 个顶点
