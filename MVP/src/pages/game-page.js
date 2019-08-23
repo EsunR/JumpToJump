@@ -44,10 +44,11 @@ export default class GamePage {
 
     // geometry相当于顶点着色器中的坐标情况，material相当于片元着色器中定义的色彩信息
     var mesh = new THREE.Mesh(geometry, material)
+    this.mesh = mesh
     mesh.position.x = 0
     mesh.position.y = 0
     mesh.position.z = 1
-    // scene.add(mesh)
+    scene.add(mesh)
 
     // 相机由 (0,0,0) 的坐标望向 (0,0,1) 的坐标
     camera.position.x = 0
@@ -74,9 +75,21 @@ export default class GamePage {
     render()
 
     renderer.render(scene, camera)
+
+    setTimeout(() => {
+      this.callbacks.showGameOverPage()
+    }, 2000);
   }
 
   restart() {
     console.log('game page restart');
+  }
+
+  show() {
+    this.mesh.visible = true
+  }
+
+  hide() {
+    this.mesh.visible = false
   }
 }

@@ -37,6 +37,7 @@ export default class GameOverPage {
     this.obj = new THREE.Mesh(this.geometry, this.material)
     this.obj.position.z = 1
     this.obj.rotation.y = Math.PI
+    this.obj.visible = false
 
     // 绘制内容
     this.context = this.canvas.getContext('2d')
@@ -51,6 +52,10 @@ export default class GameOverPage {
   }
 
   show() {
-    console.log('game over page show');
+    this.obj.visible = true
+  }
+
+  hide() {
+    this.obj.visible = false
   }
 }

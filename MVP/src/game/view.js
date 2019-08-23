@@ -6,14 +6,23 @@ class GameView {
 
   }
 
-  showGameOverPage() {
-    this.gameOverPage.show()
+  // GamePage 相关
+  initGamePage(callbacks) {
+    this.gamePage = new GamePage(callbacks)
+    this.gamePage.init()
+  }
+
+  showGamePgae() {
+    this.gameOverPage.hide()
+    this.gamePage.restart()
+    this.gamePage.show()
   }
 
   gameRestart() {
     this.gamePage.restart()
   }
 
+  // GameOverPage 相关
   initGameOverPage(callbacks) {
     this.gameOverPage = new GameOverPage(callbacks)
     this.gameOverPage.init({
@@ -21,9 +30,8 @@ class GameView {
     })
   }
 
-  initGamePage(callbacks) {
-    this.gamePage = new GamePage(callbacks)
-    this.gamePage.init()
+  showGameOverPage() {
+    this.gameOverPage.show()
   }
 }
 
