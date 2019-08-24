@@ -24,7 +24,7 @@ triangleShape.lineTo(100, -100)
 var geometry = new THREE.ShapeGeometry(triangleShape)
 // 创建一个绘制的材质 （MeshBasicMaterial可以不接受光照就将原始的图像绘制出来）
 var material = new THREE.MeshBasicMaterial({
-  color: 0xff0000,
+  color: 0xffffff,
   // side 默认只有一面
   side: THREE.DoubleSide
 })
@@ -33,14 +33,18 @@ var material = new THREE.MeshBasicMaterial({
 var mesh = new THREE.Mesh(geometry, material)
 mesh.position.x = 0
 mesh.position.y = 0
-mesh.position.z = 1
+mesh.position.z = 0
 scene.add(mesh)
 
-// 相机由 (0,0,0) 的坐标望向 (0,0,1) 的坐标
-camera.position.x = 0
-camera.position.y = 0
-camera.position.z = 0
-camera.lookAt(new THREE.Vector3(0, 0, 1))
+// 创建一个 axesHelper 添加到场景中
+var axesHelper = new THREE.AxisHelper(100)
+scene.add(this.axesHelper)
+
+// 相机由 (0,0,100) 的坐标望向 (0,0,0) 的坐标
+camera.position.x = 100
+camera.position.y = 100
+camera.position.z = 100
+camera.lookAt(new THREE.Vector3(0, 0, 0))
 
 var currentAngle = 0
 var lastTimestamp = Date.now()
@@ -52,12 +56,11 @@ var animate = function () {
 }
 
 var render = function () {
-  animate()
-  mesh.rotation.set(0, currentAngle, 0);
+  // animate()
+  // mesh.rotation.set(0, currentAngle, 0);
   renderer.render(scene, camera)
   requestAnimationFrame(render)
 }
 
 render()
 
-renderer.render(scene, camera)

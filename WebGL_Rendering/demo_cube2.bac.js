@@ -10,13 +10,30 @@ VSHADER_SOURCE =
     'attribute vec4 a_Color;\n' +
     'attribute vec4 a_Normal;\n' +
     'uniform mat4 u_MvpMatrix;\n' +
+    'varying vec4 v_Color;\n' +
+    'varying vec4 v_Normal;\n' +
     'void main() {\n' +
     '  gl_Position = u_MvpMatrix * a_Position;\n' +
+    '  v_Color = a_Color;\n' +
+    '  v_Normal = a_Normal;\n' +
     '}\n';
 
 FSHADER_SOURCE =
+    '#ifdef GL_ES\n' +
+    'precision mediump float;\n' +
+    '#endif\n' +
+    'uniform vec3 u_LightColor;\n' +
+    'uniform vec3 u_LightDir;\n' +
+    'uniform vec3 u_LightColorAmbient;\n' +
+    'varying vec4 v_Color;\n' +
+    'varying vec4 v_Normal;\n' +
     'void main() {\n' +
-    '  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n' +
+    '  vec3 normal = normalize(vec3(v_Normal));\n' +
+    '  float cos = max(dot(u_LightDir, normal), 0.0);\n' +
+    '  vec3 diffuse = u_LightColor * v_Color.rgb * cos;\n' +
+    '  vec3 ambient = u_LightColorAmbient * v_Color.rgb;\n' +
+    '  vec4 r_Color = vec4(diffuse + ambient, v_Color.a);\n'+
+    '  gl_FragColor = r_Color;\n' +
     '}\n';
 
 var vertexShader, fragmentShader
@@ -26,6 +43,7 @@ function createShader (gl, sourceCode, type) {
   var shader = gl.createShader(type)
   gl.shaderSource(shader, sourceCode)
   gl.compileShader(shader)
+  var compiled = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
   return shader
 }
 
@@ -155,6 +173,17 @@ var mvpMatrix = new Matrix4();
 mvpMatrix.setPerspective(30, 1, 1, 100);
 mvpMatrix.lookAt(3, 3, 7, 0, 0, 0, 0, 1, 0);
 gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
+
+// set directional light
+var u_LightColor = gl.getUniformLocation(gl.program, 'u_LightColor');
+gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
+
+var dir = normalizeVector([0.5, 3.0, 4.0]);
+var u_LightDir = gl.getUniformLocation(gl.program, 'u_LightDir');
+gl.uniform3f(u_LightDir, dir[0], dir[1], dir[2]);
+
+var u_LightColorAmbient = gl.getUniformLocation(gl.program, 'u_LightColorAmbient');
+gl.uniform3f(u_LightColorAmbient, 0.2, 0.2, 0.2);
 
 function draw () {
     // Clear color and depth buffer
