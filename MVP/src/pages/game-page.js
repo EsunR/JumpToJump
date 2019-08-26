@@ -1,6 +1,7 @@
 import { scene } from '../scene/index';
 import Cuboid from '../block/cuboid';
 import Cylinder from '../block/cylinder';
+import bottle from '../object/bottle';
 import ground from '../object/ground'
 
 export default class GamePage {
@@ -12,12 +13,21 @@ export default class GamePage {
     // 对引入的实例进行挂载与初始化
     this.scene = scene
     this.scene.init()
+
+    // 引入、初始化、添加地面到场景中
     this.ground = ground
     this.ground.init()
+    this.addGround()
 
+    // 初始化并添加blck到场景中
     this.addInitBlock()
 
+    // 挂载、添加 bottle 到场景中
+    this.bottle = bottle
+    this.bottle.init()
+    this.addBottle()
 
+    // 进行场景的渲染
     this.render()
   }
 
@@ -33,7 +43,11 @@ export default class GamePage {
     this.scene.instance.add(cylinderBlock.instance)
   }
 
-  addGround(){
+  addGround() {
     this.scene.instance.add(this.ground.instance)
+  }
+
+  addBottle() {
+    this.scene.instance.add(this.bottle.instance)
   }
 }

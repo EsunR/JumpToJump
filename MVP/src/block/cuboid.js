@@ -11,14 +11,14 @@ export default class Cuboid extends BaseBlock {
     })
     this.instance = new THREE.Mesh(geometry, material)
     this.instance.name = 'block'
+    // 让物体可以被投射阴影同时可以投射阴影
+    this.instance.receiveShadow = true
+    this.instance.castShadow = true
     this.x = x
     this.y = y
     this.z = z
     this.instance.position.x = this.x
     this.instance.position.y = this.y
     this.instance.position.z = this.z
-    // 让物体可以被投射阴影同时
-    this.instance.receiveShadow = true
-    this.instance.castShadow = true
   }
 }

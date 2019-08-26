@@ -17,16 +17,17 @@ class Light {
     this.shadowTarget.visible = false;
     shadowLight.name = 'shadowTarget'
     shadowLight.target = this.shadowTarget
-    shadowLight.castShadow = true // 使其能够投射阴影
+    // 使其能够投射阴影
+    shadowLight.castShadow = true
     shadowLight.shadow.camera.near = 0.5
     shadowLight.shadow.camera.far = 500
     shadowLight.shadow.camera.left = -100
     shadowLight.shadow.camera.right = 100
-    shadowLight.shadow.camera.top = -100
-    shadowLight.shadow.camera.bottom = 100
+    shadowLight.shadow.camera.top = 100
+    shadowLight.shadow.camera.bottom = -100
     shadowLight.shadow.mapSize.width = 1024
     shadowLight.shadow.mapSize.height = 1024
-    this.shadowTarget = this.shadowTarget
+    // 挂载实例到 instances 上
     this.instances.shadowLight = shadowLight
   }
 }
