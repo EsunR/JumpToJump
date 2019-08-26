@@ -21,51 +21,51 @@ var SHADOW_FSHADER_SOURCE =
 var VSHADER_SOURCE, FSHADER_SOURCE
 
 VSHADER_SOURCE =
-'attribute vec4 a_Position;\n' +
-'attribute vec4 a_Normal;\n' +
-'attribute vec2 a_TexCoord;\n' +
-'uniform mat4 u_MvpMatrix;\n' +
-'uniform mat4 u_rotateMatrix;\n' +
-'uniform mat4 u_MvpMatrixFromLight;\n' +
-'varying vec4 v_Normal;\n' +
-'varying vec2 v_TexCoord;\n' +
-'varying vec4 v_PositionFromLight;\n' +
-'void main() {\n' +
-'  v_TexCoord = a_TexCoord;\n' +
-'  gl_Position = (a_Position.y >= -1.0) ? (u_MvpMatrix * u_rotateMatrix * a_Position) : (u_MvpMatrix * a_Position);\n' +
-'  v_Normal = (a_Position.y >= -1.0) ? (u_rotateMatrix * a_Normal) : a_Normal;\n' +
-'  v_PositionFromLight = u_MvpMatrixFromLight * a_Position;\n' +
-'}\n';
+  'attribute vec4 a_Position;\n' +
+  'attribute vec4 a_Normal;\n' +
+  'attribute vec2 a_TexCoord;\n' +
+  'uniform mat4 u_MvpMatrix;\n' +
+  'uniform mat4 u_rotateMatrix;\n' +
+  'uniform mat4 u_MvpMatrixFromLight;\n' +
+  'varying vec4 v_Normal;\n' +
+  'varying vec2 v_TexCoord;\n' +
+  'varying vec4 v_PositionFromLight;\n' +
+  'void main() {\n' +
+  '  v_TexCoord = a_TexCoord;\n' +
+  '  gl_Position = (a_Position.y >= -1.0) ? (u_MvpMatrix * u_rotateMatrix * a_Position) : (u_MvpMatrix * a_Position);\n' +
+  '  v_Normal = (a_Position.y >= -1.0) ? (u_rotateMatrix * a_Normal) : a_Normal;\n' +
+  '  v_PositionFromLight = u_MvpMatrixFromLight * a_Position;\n' +
+  '}\n';
 
 FSHADER_SOURCE =
-'#ifdef GL_ES\n' +
-'precision mediump float;\n' +
-'#endif\n' +
-'uniform vec3 u_LightColor;\n' +
-'uniform vec3 u_LightDir;\n' +
-'uniform vec3 u_LightColorAmbient;\n' +
-'uniform sampler2D u_Sampler;\n' +
-'uniform sampler2D u_ShadowMap;\n' +
-'varying vec4 v_Normal;\n' +
-'varying vec2 v_TexCoord;\n' +
-'varying vec4 v_PositionFromLight;\n' +
-'void main() {\n' +
-'  vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;\n' +
-'  vec4 rgbaDepth = texture2D(u_ShadowMap, shadowCoord.xy);\n' +
-'  float depth = rgbaDepth.r;\n' + // Retrieve the z-value from R
-'  float visibility = (shadowCoord.z > depth + 0.005) ? 0.5 : 1.0;\n' +
-'  vec4 s_Color = texture2D(u_Sampler, v_TexCoord);\n' +
-'  vec3 normal = normalize(vec3(v_Normal));\n' +
-'  float cos = max(dot(u_LightDir, normal), 0.0);\n' +
-'  vec3 diffuse = u_LightColor * s_Color.rgb * cos;\n' +
-'  vec3 ambient = u_LightColorAmbient * s_Color.rgb;\n' +
-'  vec4 r_Color = vec4(diffuse + ambient, s_Color.a);\n'+
-'  gl_FragColor = vec4(r_Color.rgb * visibility, r_Color.a);\n' +
-'}\n';
+  '#ifdef GL_ES\n' +
+  'precision mediump float;\n' +
+  '#endif\n' +
+  'uniform vec3 u_LightColor;\n' +
+  'uniform vec3 u_LightDir;\n' +
+  'uniform vec3 u_LightColorAmbient;\n' +
+  'uniform sampler2D u_Sampler;\n' +
+  'uniform sampler2D u_ShadowMap;\n' +
+  'varying vec4 v_Normal;\n' +
+  'varying vec2 v_TexCoord;\n' +
+  'varying vec4 v_PositionFromLight;\n' +
+  'void main() {\n' +
+  '  vec3 shadowCoord = (v_PositionFromLight.xyz/v_PositionFromLight.w)/2.0 + 0.5;\n' +
+  '  vec4 rgbaDepth = texture2D(u_ShadowMap, shadowCoord.xy);\n' +
+  '  float depth = rgbaDepth.r;\n' + // Retrieve the z-value from R
+  '  float visibility = (shadowCoord.z > depth + 0.005) ? 0.5 : 1.0;\n' +
+  '  vec4 s_Color = texture2D(u_Sampler, v_TexCoord);\n' +
+  '  vec3 normal = normalize(vec3(v_Normal));\n' +
+  '  float cos = max(dot(u_LightDir, normal), 0.0);\n' +
+  '  vec3 diffuse = u_LightColor * s_Color.rgb * cos;\n' +
+  '  vec3 ambient = u_LightColorAmbient * s_Color.rgb;\n' +
+  '  vec4 r_Color = vec4(diffuse + ambient, s_Color.a);\n' +
+  '  gl_FragColor = vec4(r_Color.rgb * visibility, r_Color.a);\n' +
+  '}\n';
 
 var OFFSCREEN_WIDTH = 2048, OFFSCREEN_HEIGHT = 2048;
 
-function createShader (gl, sourceCode, type) {
+function createShader(gl, sourceCode, type) {
   // create shader
   var shader = gl.createShader(type)
   gl.shaderSource(shader, sourceCode)
@@ -80,7 +80,7 @@ function createShader (gl, sourceCode, type) {
   return shader
 }
 
-function createProgram (gl, vSource, fSource) {
+function createProgram(gl, vSource, fSource) {
   var program = gl.createProgram()
   // define vertex shader
   var vertexShader = createShader(gl, vSource, gl.VERTEX_SHADER)
@@ -96,12 +96,13 @@ function createProgram (gl, vSource, fSource) {
 
   return program
 }
-
+// 连接普通的 shader
 var normalProgram = createProgram(gl, VSHADER_SOURCE, FSHADER_SOURCE)
 
 gl.useProgram(normalProgram)
 gl.program = normalProgram
 
+// 连接阴影的 shader
 var shadowProgram = createProgram(gl, SHADOW_VSHADER_SOURCE, SHADOW_FSHADER_SOURCE)
 var tick = function () {
   draw()
@@ -114,114 +115,114 @@ function initAttributeVariable(gl, a_attribute, buffer) {
   gl.enableVertexAttribArray(a_attribute);
 }
 
-function initVertexBuffers (gl) {
-    // Create a buffer object
-    var vertices = new Float32Array([   // Vertex coordinates
-      1.0, 1.0, 1.0,  -1.0, 1.0, 1.0,  -1.0,-1.0, 1.0,   1.0,-1.0, 1.0,    // v0-v1-v2-v3 front
-      1.0, 1.0, 1.0,   1.0,-1.0, 1.0,   1.0,-1.0,-1.0,   1.0, 1.0,-1.0,    // v0-v3-v4-v5 right
-      1.0, 1.0, 1.0,   1.0, 1.0,-1.0,  -1.0, 1.0,-1.0,  -1.0, 1.0, 1.0,    // v0-v5-v6-v1 up
-      -1.0, 1.0, 1.0,  -1.0, 1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0,-1.0, 1.0,    // v1-v6-v7-v2 left
-      -1.0,-1.0,-1.0,   1.0,-1.0,-1.0,   1.0,-1.0, 1.0,  -1.0,-1.0, 1.0,    // v7-v4-v3-v2 down
-      1.0,-1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0, 1.0,-1.0,   1.0, 1.0,-1.0,     // v4-v7-v6-v5 back
-      
-      3.0, -2.0, 3.0,  -3.0, -2.0, 3.0,  -3.0, -4.0, 3.0,   3.0, -4.0, 3.0,    // v0-v1-v2-v3 front
-      3.0, -2.0, 3.0,   3.0, -4.0, 3.0,   3.0, -4.0, -3.0,   3.0, -2.0, -3.0,    // v0-v3-v4-v5 right
-      3.0, -2.0, 3.0,   3.0, -2.0, -3.0,  -3.0, -2.0, -3.0,  -3.0, -2.0, 3.0,    // v0-v5-v6-v1 up
-      -3.0, -2.0, 3.0,  -3.0, -2.0, -3.0,  -3.0, -4.0, -3.0,  -3.0, -4.0, 3.0,    // v1-v6-v7-v2 left
-      -3.0, -4.0, -3.0,   3.0, -4.0, -3.0,   3.0, -4.0, 3.0,  -3.0, -4.0, 3.0,    // v7-v4-v3-v2 down
-      3.0, -4.0, -3.0,  -3.0, -4.0, -3.0,  -3.0, -2.0, -3.0,   3.0, -2.0, -3.0,     // v4-v7-v6-v5 back
-    ]);
-    
-    // 每个顶点的法向量
-    var normals = new Float32Array([
-      0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-      1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-      0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
-      -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0,
-      0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0,
-      0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0,
-      0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
-      1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-      0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
-      -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0,
-      0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0,
-      0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0,
-    ]);
-    
-    var indices = new Uint8Array([       // Indices of the vertices
-      0, 1, 2,   0, 2, 3,    // front
-      4, 5, 6,   4, 6, 7,    // right
-      8, 9,10,   8,10,11,    // up
-      12,13,14,  12,14,15,    // left
-      16,17,18,  16,18,19,    // down
-      20,21,22,  20,22,23,    // back
-      24,25,26,  24,26,27,
-      28,29,30,  28,30,31,
-      32,33,34,  32,34,35,
-      36,37,38,  36,38,39,
-      40,41,42,  40,42,43,
-      44,45,46,  44,46,47
-    ]);
-    
-    var verticesTexCoords = new Float32Array([
+function initVertexBuffers(gl) {
+  // Create a buffer object
+  var vertices = new Float32Array([   // Vertex coordinates
+    1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0, 1.0,    // v0-v1-v2-v3 front
+    1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0, -1.0,    // v0-v3-v4-v5 right
+    1.0, 1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0,    // v0-v5-v6-v1 up
+    -1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0,    // v1-v6-v7-v2 left
+    -1.0, -1.0, -1.0, 1.0, -1.0, -1.0, 1.0, -1.0, 1.0, -1.0, -1.0, 1.0,    // v7-v4-v3-v2 down
+    1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0,     // v4-v7-v6-v5 back
+
+    3.0, -2.0, 3.0, -3.0, -2.0, 3.0, -3.0, -4.0, 3.0, 3.0, -4.0, 3.0,    // v0-v1-v2-v3 front
+    3.0, -2.0, 3.0, 3.0, -4.0, 3.0, 3.0, -4.0, -3.0, 3.0, -2.0, -3.0,    // v0-v3-v4-v5 right
+    3.0, -2.0, 3.0, 3.0, -2.0, -3.0, -3.0, -2.0, -3.0, -3.0, -2.0, 3.0,    // v0-v5-v6-v1 up
+    -3.0, -2.0, 3.0, -3.0, -2.0, -3.0, -3.0, -4.0, -3.0, -3.0, -4.0, 3.0,    // v1-v6-v7-v2 left
+    -3.0, -4.0, -3.0, 3.0, -4.0, -3.0, 3.0, -4.0, 3.0, -3.0, -4.0, 3.0,    // v7-v4-v3-v2 down
+    3.0, -4.0, -3.0, -3.0, -4.0, -3.0, -3.0, -2.0, -3.0, 3.0, -2.0, -3.0,     // v4-v7-v6-v5 back
+  ]);
+
+  // 每个顶点的法向量
+  var normals = new Float32Array([
+    0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+    1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+    -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0,
+    0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0,
+    0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0,
+    0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
+    1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+    -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0,
+    0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0,
+    0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0, 0.0, 0.0, -1.0,
+  ]);
+
+  var indices = new Uint8Array([       // Indices of the vertices
+    0, 1, 2, 0, 2, 3,    // front
+    4, 5, 6, 4, 6, 7,    // right
+    8, 9, 10, 8, 10, 11,    // up
+    12, 13, 14, 12, 14, 15,    // left
+    16, 17, 18, 16, 18, 19,    // down
+    20, 21, 22, 20, 22, 23,    // back
+    24, 25, 26, 24, 26, 27,
+    28, 29, 30, 28, 30, 31,
+    32, 33, 34, 32, 34, 35,
+    36, 37, 38, 36, 38, 39,
+    40, 41, 42, 40, 42, 43,
+    44, 45, 46, 44, 46, 47
+  ]);
+
+  var verticesTexCoords = new Float32Array([
     // Vertex coordinates, texture coordinate
-      1.0,1.0, 0.0,1.0, 0.0,0.0, 1.0,0.0,
-      0.0,1.0, 0.0,0.0, 1.0,0.0, 1.0,1.0,
-      1.0,0.0, 1.0,1.0, 0.0,1.0, 0.0,0.0,
-      1.0,1.0, 0.0,1.0, 0.0,0.0, 1.0,0.0,
-      0.0,0.0, 1.0,0.0, 1.0,1.0, 0.0,1.0,
-      0.0,0.0, 1.0,0.0, 1.0,1.0, 0.0,1.0,
-      1.0,1.0, 0.0,1.0, 0.0,0.0, 1.0,0.0,
-      0.0,1.0, 0.0,0.0, 1.0,0.0, 1.0,1.0,
-      1.0,0.0, 1.0,1.0, 0.0,1.0, 0.0,0.0,
-      1.0,1.0, 0.0,1.0, 0.0,0.0, 1.0,0.0,
-      0.0,0.0, 1.0,0.0, 1.0,1.0, 0.0,1.0,
-      0.0,0.0, 1.0,0.0, 1.0,1.0, 0.0,1.0,
-    ]);
+    1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0,
+    1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+    1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0,
+    1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+    1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
+  ]);
 
-    var o = new Object();
-    var indexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-    o.indexBuffer = indexBuffer;
-    o.positionBuffer = initArrayBuffer(gl, vertices, 3, gl.FLOAT, gl.program);
-    o.normalBuffer = initArrayBuffer(gl, normals, 3, gl.FLOAT, gl.program)
-    o.texCoordBuffer = initArrayBuffer(gl, verticesTexCoords, 2, gl.FLOAT, gl.program)
+  var o = new Object();
+  var indexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+  o.indexBuffer = indexBuffer;
+  o.positionBuffer = initArrayBuffer(gl, vertices, 3, gl.FLOAT, gl.program);
+  o.normalBuffer = initArrayBuffer(gl, normals, 3, gl.FLOAT, gl.program)
+  o.texCoordBuffer = initArrayBuffer(gl, verticesTexCoords, 2, gl.FLOAT, gl.program)
 
-    var shadowIndexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shadowIndexBuffer);
-    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-    o.shadowIndexBuffer = shadowIndexBuffer;
-    o.shadowPositionBuffer = initArrayBuffer(gl, vertices, 3, gl.FLOAT, shadowProgram);
+  var shadowIndexBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, shadowIndexBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+  o.shadowIndexBuffer = shadowIndexBuffer;
+  o.shadowPositionBuffer = initArrayBuffer(gl, vertices, 3, gl.FLOAT, shadowProgram);
 
-    o.n = indices.length;
-    return o;
+  o.n = indices.length;
+  return o;
 }
 
 function initArrayBuffer(gl, data, num, type, program) {
-    // Create a buffer object
-    var buffer = gl.createBuffer();
-    if (!buffer) {
-      console.log('Failed to create the buffer object');
-      return false;
-    }
-    // Write date into the buffer object
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
-  
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
-    
-    buffer.num = num;
-    buffer.type = type;
+  // Create a buffer object
+  var buffer = gl.createBuffer();
+  if (!buffer) {
+    console.log('Failed to create the buffer object');
+    return false;
+  }
+  // Write date into the buffer object
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
 
-    return buffer;
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+  buffer.num = num;
+  buffer.type = type;
+
+  return buffer;
 }
 
-function normalizeVector (vector) {
-    var len = Math.sqrt(vector[0]**2 + vector[1]**2 + vector[2]**2)
-    return [vector[0] / len, vector[1] / len, vector[2] / len]
+function normalizeVector(vector) {
+  var len = Math.sqrt(vector[0] ** 2 + vector[1] ** 2 + vector[2] ** 2)
+  return [vector[0] / len, vector[1] / len, vector[2] / len]
 }
-  
+
 
 // write the positions of vertices to a vertex shader
 var o = initVertexBuffers(gl)
@@ -251,7 +252,7 @@ gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
 
 var u_ShadowMvpMatrix = gl.getUniformLocation(shadowProgram, 'u_MvpMatrix');
 var u_ShadowRotateMatrix = gl.getUniformLocation(shadowProgram, 'u_rotateMatrix');
-var shadowMvpMatrix =  new Matrix4();
+var shadowMvpMatrix = new Matrix4();
 shadowMvpMatrix.setPerspective(30, 1, 1, 100);
 shadowMvpMatrix.lookAt(0, 21, 0, 0, 0, 0, 0, 0, 1);
 
@@ -278,36 +279,36 @@ var texCoordLocation = gl.getAttribLocation(gl.program, 'a_TexCoord');
 var shadowPositionLocation = gl.getAttribLocation(shadowProgram, 'a_Position');
 var g_last = Date.now()
 
-function draw () {
-    var now = Date.now()
-    var duration = now - g_last
-    g_last = now
-    // Clear color and depth buffer
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    rotateMatrix.rotate(duration / 5000 * 180, 0, 1, 0);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-    gl.viewport(0, 0, OFFSCREEN_HEIGHT, OFFSCREEN_HEIGHT);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);   // Clear FBO
-    gl.useProgram(shadowProgram); // Set shaders for generating a shadow map
-    initAttributeVariable(gl, shadowPositionLocation, o.shadowPositionBuffer);
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, o.shadowIndexBuffer);
-    gl.uniformMatrix4fv(u_ShadowRotateMatrix, false, rotateMatrix.elements);
-    gl.uniformMatrix4fv(u_ShadowMvpMatrix, false, shadowMvpMatrix.elements);    
-    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+function draw() {
+  var now = Date.now()
+  var duration = now - g_last
+  g_last = now
+  // Clear color and depth buffer
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  rotateMatrix.rotate(duration / 5000 * 180, 0, 1, 0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.viewport(0, 0, OFFSCREEN_HEIGHT, OFFSCREEN_HEIGHT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);   // Clear FBO
+  gl.useProgram(shadowProgram); // Set shaders for generating a shadow map
+  initAttributeVariable(gl, shadowPositionLocation, o.shadowPositionBuffer);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, o.shadowIndexBuffer);
+  gl.uniformMatrix4fv(u_ShadowRotateMatrix, false, rotateMatrix.elements);
+  gl.uniformMatrix4fv(u_ShadowMvpMatrix, false, shadowMvpMatrix.elements);
+  gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);               // Change the drawing destination to color buffer
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);    // Clear color and depth buffer
-    gl.useProgram(gl.program);
-    initAttributeVariable(gl, normalLocation, o.normalBuffer);
-    initAttributeVariable(gl, positionLocation, o.positionBuffer);
-    initAttributeVariable(gl, texCoordLocation, o.texCoordBuffer);    
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, o.indexBuffer);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);               // Change the drawing destination to color buffer
+  gl.viewport(0, 0, canvas.width, canvas.height);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);    // Clear color and depth buffer
+  gl.useProgram(gl.program);
+  initAttributeVariable(gl, normalLocation, o.normalBuffer);
+  initAttributeVariable(gl, positionLocation, o.positionBuffer);
+  initAttributeVariable(gl, texCoordLocation, o.texCoordBuffer);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, o.indexBuffer);
 
-    gl.uniform1i(u_ShadowMap, 0);  // Pass 0 because gl.TEXTURE0 is enabledする
-    gl.uniformMatrix4fv(u_rotateMatrix, false, rotateMatrix.elements);
-    // Draw the cube
-    gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
+  gl.uniform1i(u_ShadowMap, 0);  // Pass 0 because gl.TEXTURE0 is enabledする
+  gl.uniformMatrix4fv(u_rotateMatrix, false, rotateMatrix.elements);
+  // Draw the cube
+  gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
 
 }
 
@@ -331,7 +332,7 @@ function initTextures(gl, n) {
     return false;
   }
   // Register the event handler to be called on loading an image
-  image.onload = function(){ loadTexture(gl, n, texture, u_Sampler, image); };
+  image.onload = function () { loadTexture(gl, n, texture, u_Sampler, image); };
   // Tell the browser to load an image
   image.src = './wall.jpg';
 
@@ -349,7 +350,7 @@ function loadTexture(gl, n, texture, u_Sampler, image) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   // Set the texture image
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-  
+
   // Set the texture unit 0 to the sampler
   gl.uniform1i(u_Sampler, 1);
 
@@ -360,7 +361,7 @@ function initFramebufferObject(gl) {
   var framebuffer, texture, depthBuffer;
 
   // Define the error handling function
-  var error = function() {
+  var error = function () {
     if (framebuffer) gl.deleteFramebuffer(framebuffer);
     if (texture) gl.deleteTexture(texture);
     if (depthBuffer) gl.deleteRenderbuffer(depthBuffer);
