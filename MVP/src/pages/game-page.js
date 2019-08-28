@@ -27,12 +27,18 @@ export default class GamePage {
     this.bottle.init()
     this.addBottle()
 
+    // 绑定点击事件
+    this.bindTouchEvent()
+
     // 进行场景的渲染
     this.render()
   }
 
   render() {
     this.scene.render()
+    if (this.bottle) {
+      this.bottle.update()
+    }
     requestAnimationFrame(this.render.bind(this))
   }
 
@@ -49,5 +55,25 @@ export default class GamePage {
 
   addBottle() {
     this.scene.instance.add(this.bottle.instance)
+    this.bottle.showup()
+  }
+
+  bindTouchEvent() {
+    canvas.addEventListener('touchstart', this.touchStartCallback)
+    canvas.addEventListener('touchend', this.touchEndCallback)
+    this.bottle.rotate()
+  }
+
+  removeTouchEvent() {
+    canvas.removeEventListener('touchstart', this.touchStartCallback)
+    canvas.removeEventListener('touchend', this.touchEndCallback)
+  }
+
+  touchStartCallback() {
+    console.log('touch start');
+  }
+
+  touchEndCallback() {
+    console.log('touch end');
   }
 }

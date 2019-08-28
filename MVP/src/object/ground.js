@@ -5,9 +5,9 @@ class Ground {
   init() {
     const groundGeometry = new THREE.PlaneGeometry(200, 200)
     const material = new THREE.ShadowMaterial({
-      transparent: true
+      transparent: true,
+      opacity: 0.2
     })
-    material.opacity = 0.2
 
     this.instance = new THREE.Mesh(groundGeometry, material)
 

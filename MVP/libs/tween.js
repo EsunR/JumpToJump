@@ -1,4 +1,8 @@
 var Tween = {
+    // t - 当前帧
+    // b - 动画起始值
+    // c - 值区间
+    // d - 动画总帧数
   Linear: function Linear(t, b, c, d) {
       return c * t / d + b;
   },

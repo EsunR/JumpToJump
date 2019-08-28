@@ -1,175 +1,97 @@
-import Tween from './tween'
-var animationId = -1
-var killAnimationId = animationId - 1
+/**
+ * @description 动画库
+ * @detail 实现动画的连续播放
+ * @param duration 时间间隔
+ * @param form
+ * @param to
+ * @param type
+ * @param delay 动画延迟时间
+ */
 
+import Tween from './tween';
 
-var customAnimation = exports.customAnimation = {};
-customAnimation.to = function (obj, duration, options) {
-    duration *= 1000;
-    var delay = options.delay || 0;
-    for (var name in options) {
-        if (name === 'delay') {
-            delay = options[name];
-        } else if (name === 'onComplete') {} else if (name === 'ease') {} else {
-            setTimeout(function (name) {
-                return function () {
-                    //console.log("name", name, obj[name], options[name], duration, delay, obj)
-                    TweenAnimation(obj[name], options[name], duration, options.ease || 'Linear', function (value, complete) {
-                        obj[name] = value;
-                        if (complete) {
-                            options.onComplete && options.onComplete();
-                        }
-                    });
-                };
-            }(name), delay * 1000);
-        }
+export const customAnimation = {}
+customAnimation.to = function (duration, from, to, type, delay = 0) {
+  for (let prop in from) {
+    if (to[prop]) {
+      setTimeout(() => {
+        TweenAnimation(from[prop], to[prop], duration, type, (value, complete) => {
+          // 将新的坐标值应用于对象
+          from[prop] = value
+        })
+      }, delay * 1000)
     }
+  }
 }
 
-// 对运动方法进行封装
-var TweenAnimation = exports.TweenAnimation = function TweenAnimation(from, to, duration, easing, callback) {
-    var selfAnimationId = ++animationId;
-    var isUndefined = function isUndefined(obj) {
-        return typeof obj == 'undefined';
-    };
-    var isFunction = function isFunction(obj) {
-        return typeof obj == 'function';
-    };
-    var isNumber = function isNumber(obj) {
-        return typeof obj == 'number';
-    };
-    var isString = function isString(obj) {
-        return typeof obj == 'string';
-    };
+// 计算每个时间点下的动画状态
+// duartion 单位为秒
+export function TweenAnimation(from, to, duration, type, callback) {
+  // 初始化
+  const options = {
+    callback: function () { },
+    type: 'Linear',
+    duration: 300
+  }
+  if (callback) {
+    options.callback = callback
+  }
+  if (type) {
+    options.type = type
+  }
+  if (duration) {
+    options.duration = duration
+  }
 
-    // 转换成毫秒
-    var toMillisecond = function toMillisecond(obj) {
-        if (isNumber(obj)) {
-            return obj;
-        } else if (isString(obj)) {
-            if (/\d+m?s$/.test(obj)) {
-                if (/ms/.test(obj)) {
-                    return 1 * obj.replace('ms', '');
-                }
-                return 1000 * obj.replace('s', '');
-            } else if (/^\d+$/.test(obj)) {
-                return +obj;
-            }
-        }
-        return -1;
-    };
+  // 计算动画时间内产生了多少帧画面
+  const frameCount = duration * 1000 / 17
+  let start = -1
 
-    if (!isNumber(from) || !isNumber(to)) {
-        if (window.console) {
-            console.error('from和to两个参数必须且为数值');
-        }
-        return 0;
+  const startTime = Date.now()
+  let lastTime = Date.now()
+
+  let tweenFn = Tween
+  let typeArr = options.type.split(".")
+  for (let i in typeArr) {
+    tweenFn = tweenFn[typeArr[i]]
+    if (tweenFn === undefined) {
+      console.error(`调用的动画名 ${typeArr[i]} 不存在`)
+    }
+  }
+
+  // 绘制
+  var step = function () {
+    const currentTime = Date.now()
+    const interval = currentTime - lastTime
+    let fps = 0
+
+    if (interval) {
+      fps = Math.ceil(1000 / interval)
+    } else {
+      requestAnimationFrame(step)
+      return
     }
 
-    // 缓动算法
-    var tween = Tween
-
-    if (!tween) {
-        if (window.console) {
-            console.error('缓动算法函数缺失');
-        }
-        return 0;
+    // 为了防止屏幕 requestAnimationFrame 的不准确，需要计算每帧画面的时间间隔，如果时间间隔过长，则跳过绘制的帧数以同步时间
+    if (fps >= 30) {
+      start++
+    } else {
+      const _start = Math.floor((interval / 17))
+      start = start + _start
     }
 
-    // duration, easing, callback均为可选参数
-    // 而且顺序可以任意
-    var options = {
-        duration: 300,
-        easing: 'Linear',
-        callback: function callback() {}
-    };
+    const value = tweenFn(start, from, to - from, frameCount)
 
-    var setOptions = function setOptions(obj) {
-        if (isFunction(obj)) {
-            options.callback = obj;
-        } else if (toMillisecond(obj) != -1) {
-            options.duration = toMillisecond(obj);
-        } else if (isString(obj)) {
-            options.easing = obj;
-        }
-    };
-    setOptions(duration);
-    setOptions(easing);
-    setOptions(callback);
-
-    // requestAnimationFrame的兼容处理
-    if (!window.requestAnimationFrame) {
-        requestAnimationFrame = function requestAnimationFrame(fn) {
-            setTimeout(fn, 17);
-        };
+    if (start <= frameCount) {
+      options.callback(value)
+      requestAnimationFrame(step)
+    } else {
+      // 参数true用于检测该回调是否是完成时的回调函数
+      options.callback(to, true)
     }
 
-    // 算法需要的几个变量
-    var start = -1;
-    // during根据设置的总时间计算
-    var during = Math.ceil(options.duration / 17);
+    lastTime = Date.now()
+  }
 
-    // 当前动画算法
-    // 确保首字母大写
-    options.easing = options.easing.slice(0, 1).toUpperCase() + options.easing.slice(1);
-    var arrKeyTween = options.easing.split('.');
-    var fnGetValue;
-
-    if (arrKeyTween.length == 1) {
-        fnGetValue = tween[arrKeyTween[0]];
-    } else if (arrKeyTween.length == 2) {
-        fnGetValue = tween[arrKeyTween[0]] && tween[arrKeyTween[0]][arrKeyTween[1]];
-    }
-    if (isFunction(fnGetValue) == false) {
-        console.error('没有找到名为"' + options.easing + '"的动画算法');
-        return;
-    }
-
-    var startTime = Date.now();
-    var lastTime = Date.now();
-    // 运动
-    var step = function step() {
-
-        var currentTime = Date.now();
-        var interval = currentTime - lastTime;
-
-        if (interval) {
-            var fps = Math.ceil(1000 / interval);
-        } else {
-            requestAnimationFrame(step);
-            return;
-        }
-
-        lastTime = currentTime;
-        if (interval > 100) {
-            requestAnimationFrame(step);
-            return;
-        }
-
-        if (fps >= 30) {
-            start++;
-        } else {
-            var _start = Math.floor((currentTime - startTime) / 17);
-            start = _start > start ? _start : start + 1;
-        }
-
-        // 当前的运动位置
-
-        var value = fnGetValue(start, from, to - from, during);
-
-        // 如果还没有运动到位，继续
-        if (start <= during && selfAnimationId > killAnimationId) {
-            options.callback(value);
-            requestAnimationFrame(step);
-        } else if (start > during && selfAnimationId > killAnimationId) {
-            // 动画结束，这里可以插入回调...
-            options.callback(to, true);
-        } else {}
-    };
-    // 开始执行动画
-    step();
-};
-
-TweenAnimation.killAll = function () {
-    killAnimationId = animationId;
-};
+  step()
+}
