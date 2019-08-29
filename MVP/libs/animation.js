@@ -12,8 +12,8 @@ import Tween from './tween';
 
 export const customAnimation = {}
 customAnimation.to = function (duration, from, to, type, delay = 0) {
-  for (let prop in from) {
-    if (to[prop]) {
+  for (let prop in to) {
+    if (from[prop] !== undefined) {
       setTimeout(() => {
         TweenAnimation(from[prop], to[prop], duration, type, (value, complete) => {
           // 将新的坐标值应用于对象
@@ -49,7 +49,6 @@ export function TweenAnimation(from, to, duration, type, callback) {
 
   const startTime = Date.now()
   let lastTime = Date.now()
-
   let tweenFn = Tween
   let typeArr = options.type.split(".")
   for (let i in typeArr) {
