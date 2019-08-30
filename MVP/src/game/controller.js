@@ -23,11 +23,13 @@ class GameController {
   initPages() {
     const gamePageCallbacks = {
       showGameOverPage: () => {
+        console.log("callbacks: show game over page");
         this.gameModel.setStage('game-over')
       }
     }
     const gameOverPageCallbacks = {
       showGamePage: () => {
+        console.log("callbacks: show game page");
         this.gameModel.setStage('game')
       }
     }

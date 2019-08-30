@@ -30,6 +30,16 @@ class Light {
     // 挂载实例到 instances 上
     this.instances.shadowLight = shadowLight
   }
+
+  updatePosition(targetPosition) {
+    customAnimation.to(this.shadowTarget.position, 0.5, { x: targetPosition.x, y: targetPosition.y, z: targetPosition.z })
+    customAnimation.to(this.shadowLight.position, 0.5, { x: 10 + targetPosition.x, y: 30 + targetPosition.y, z: 20 + targetPosition.z })
+  }
+
+  reset() {
+    this.shadowLight.position.set(10, 30, 20)
+    this.shadowTarget.position.set(0, 0, 0)
+  }
 }
 
 export default new Light()

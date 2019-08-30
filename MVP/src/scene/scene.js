@@ -30,7 +30,7 @@ class Scene {
     this.background = background
     this.background.init()
     this.background.instance.position.z = -84
-    
+
     // 背景要时刻显示在相机直视的位置，所以将背景添加到相机上
     this.camera.instance.add(this.background.instance)
 
@@ -49,6 +49,11 @@ class Scene {
 
   render() {
     this.renderer.render(this.instance, this.camera.instance)
+  }
+
+  updateCameraPosition(targetPosition) {
+    this.camera.updatePosition(targetPosition)
+    this.light.updatePosition(targetPosition)
   }
 }
 

@@ -41,4 +41,24 @@ export default class BaseBlock {
     this.status = 'shrink'
   }
 
+  getVertices() {
+    const vertices = []
+    const centerPosition = {
+      x: this.instance.position.x,
+      z: this.instance.position.z
+    }
+    /*
+     获取 block 上平面四条边的顶点坐标，存放入 vertices
+     |-[3]-----[1]--→ x
+     |    |   |
+     | [2]-----[0]
+     ↓
+     z
+    */
+    vertices.push([centerPosition.x + this.width / 2, centerPosition.z + this.width / 2])
+    vertices.push([centerPosition.x + this.width / 2, centerPosition.z - this.width / 2])
+    vertices.push([centerPosition.x - this.width / 2, centerPosition.z + this.width / 2])
+    vertices.push([centerPosition.x - this.width / 2, centerPosition.z - this.width / 2])
+    return vertices
+  }
 }
