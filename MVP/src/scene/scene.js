@@ -1,10 +1,14 @@
 import camera from './camera';
 import light from './light';
 import background from '../object/background';
+import sceneConf from '../config/scene-conf';
 
 class Scene {
   constructor() {
     this.instance = null
+    this.currentScore = null
+    this.sceneWidth = sceneConf.frustumSize * 2,
+      this.sceneHeight = window.innerHeight / window.innerWidth * sceneConf.frustumSize * 2
   }
 
   init() {
@@ -59,6 +63,21 @@ class Scene {
   updateCameraPosition(targetPosition) {
     this.camera.updatePosition(targetPosition)
     this.light.updatePosition(targetPosition)
+  }
+
+  addScore(scoreInstance) {
+    // 提供给外部调用，将传入的分数实例添加到场景中
+    this.currentScore = scoreInstance
+    this.camera.instance.add(scoreInstance)
+    scoreInstance.position.x = 10 - this.sceneWidth / 2
+    scoreInstance.position.y = this.sceneHeight / 2 - 15
+  }
+
+  updateScore(scoreInstance) {
+    // 移除分数实例
+    this.camera.instance.remove(this.currentScore)
+    // 添加更新过的分数实例，实现视图的更新
+    this.addScore(scoreInstance)
   }
 }
 

@@ -7,6 +7,7 @@ import blockConf from '../config/block-conf';
 import gameConf from '../config/game-conf';
 import utils from '../utils/index';
 import bottleConf from '../config/bottle-conf';
+import ScoreText from '../view3d/scoreText';
 
 // 规定跳跃后的状态
 const GAME_OVER_NORMAL = 0
@@ -23,6 +24,7 @@ export default class GamePage {
     this.callbacks = callbacks
     this.targetPosition = {}
     this.checkingHit = false
+    this.score = 0
   }
 
   init() {
@@ -40,8 +42,15 @@ export default class GamePage {
     this.bottle.init()
     this.addBottle()
 
-    // 初始化并添加blck到场景中
+    // 初始化并添加block到场景中
     this.addInitBlock()
+
+    // 挂载、添加分数到场景中
+    this.scoreText = new ScoreText()
+    this.scoreText.init({
+      fillStyle: 0x666699 
+    })
+    this.addScore()
 
     // 绑定点击事件
     this.bindTouchEvent()
@@ -61,6 +70,17 @@ export default class GamePage {
     this.bindTouchEvent()
   }
 
+  addScore() {
+    this.scene.addScore(this.scoreText.instance)
+  }
+
+  updateScore(score) {
+    // 替换内部文字实例
+    this.scoreText.updateScore(score)
+    // 移除场景中原有的文字，将新的文字渲染到屏幕上
+    this.scene.updateScore(this.scoreText.instance)
+  }
+
   deleteObjectsfromScene() {
     // 获取场景中的一个 block 对象
     let obj = this.scene.instance.getObjectByName('block')
@@ -77,7 +97,6 @@ export default class GamePage {
       obj = this.scene.instance.getObjectByName('block')
       count++
     }
-    console.log("删除了: ", count);
     // 对于已经是实例化的 bottle 和 ground 只是将其移出场景
     this.scene.instance.remove(this.bottle.obj)
     this.scene.instance.remove(this.ground.instance)
@@ -328,6 +347,7 @@ export default class GamePage {
         this.bottle.obj.position.z = this.bottle.destination[1]
         this.checkingHit = false
         if (this.hit === HIT_NEXT_BLOCK_CENTER || this.hit === HIT_NEXT_BLOCK_NORMAL) {
+          this.updateScore(++this.score)
           this.updateNextBlock()
         }
       } else { // game over
