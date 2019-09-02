@@ -8,6 +8,7 @@ import gameConf from '../config/game-conf';
 import utils from '../utils/index';
 import bottleConf from '../config/bottle-conf';
 import ScoreText from '../view3d/scoreText';
+import audioManager from '../modules/audio-manager';
 
 // 规定跳跃后的状态
 const GAME_OVER_NORMAL = 0
@@ -48,7 +49,7 @@ export default class GamePage {
     // 挂载、添加分数到场景中
     this.scoreText = new ScoreText()
     this.scoreText.init({
-      fillStyle: 0x666699 
+      fillStyle: 0x666699
     })
     this.addScore()
 
@@ -180,6 +181,7 @@ export default class GamePage {
     this.touchStartTime = Date.now()
     this.bottle.shrink()
     this.currentBlock.shrink()
+    audioManager.shrink.play()
   }
 
   touchEndCallback = () => {
@@ -212,7 +214,12 @@ export default class GamePage {
     // 预判断该次跳跃后的碰撞状态
     this.hit = this.getHitStatus(this.bottle, this.currentBlock, this.nextBlock, initY)
     this.checkingHit = true // render过程开始监视小瓶状态
+
     console.log("预判断碰撞状态：", this.hit);
+    
+    // 停止播放音频
+    audioManager.shrink.stop()
+    audioManager.shrink_end.stop()
   }
 
   setDirection(direction) {

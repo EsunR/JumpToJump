@@ -7,8 +7,8 @@ class Scene {
   constructor() {
     this.instance = null
     this.currentScore = null
-    this.sceneWidth = sceneConf.frustumSize * 2,
-      this.sceneHeight = window.innerHeight / window.innerWidth * sceneConf.frustumSize * 2
+    this.sceneWidth = sceneConf.frustumSize * 2
+    this.sceneHeight = window.innerHeight / window.innerWidth * sceneConf.frustumSize * 2
   }
 
   init() {
