@@ -116,6 +116,15 @@ class Bottle {
     this.instance = this.obj
   }
 
+  reset() {
+    this.stop()
+    this.obj.position.set(
+      this.objStartPosition.x,
+      this.objStartPosition.y + 60,
+      this.objStartPosition.z
+    )
+  }
+
   loadTexture() {
     // 加载纹理
     this.loader = new THREE.TextureLoader()
@@ -225,16 +234,18 @@ class Bottle {
   }
 
   jump() {
+    this.flyingTime = 0
     this.status = 'jump'
   }
 
   _jump(tickTime) {
+    // 计算每一时刻的状态
     const t = tickTime / 1000
-    this.flyingTime = this.flyingTime + t
     const translateH = this.velocity.vx * t
     const translateY = this.velocity.vy * t - 0.5 * gameConf.gravity * t * t - gameConf.gravity * this.flyingTime * t
     this.obj.translateY(translateY)
     this.obj.translateOnAxis(this.axis, translateH)
+    this.flyingTime = this.flyingTime + t
   }
 }
 

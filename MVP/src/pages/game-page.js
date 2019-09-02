@@ -50,6 +50,39 @@ export default class GamePage {
     this.render()
   }
 
+  restart() {
+    this.deleteObjectsfromScene() // 删除场景中的所有物体
+    this.scene.reset() // 在scene中去初始化相机和光线的位置
+    this.bottle.reset()
+    this.ground.init()
+    this.addInitBlock()
+    this.addGround()
+    this.addBottle()
+    this.bindTouchEvent()
+  }
+
+  deleteObjectsfromScene() {
+    // 获取场景中的一个 block 对象
+    let obj = this.scene.instance.getObjectByName('block')
+    let count = 0
+    while (obj) {
+      this.scene.instance.remove(obj)
+      if (obj.geometry) {
+        obj.geometry.dispose() // 销毁实例化的 geometry 防止内存泄露
+      }
+      if (obj.material) {
+        obj.material.dispose() // 销毁实例化的 material
+      }
+      // 将对象 obj 迭代为下一个blcok
+      obj = this.scene.instance.getObjectByName('block')
+      count++
+    }
+    console.log("删除了: ", count);
+    // 对于已经是实例化的 bottle 和 ground 只是将其移出场景
+    this.scene.instance.remove(this.bottle.obj)
+    this.scene.instance.remove(this.ground.instance)
+  }
+
   render() {
     this.scene.render()
     if (this.currentBlock) {
@@ -93,17 +126,18 @@ export default class GamePage {
   }
 
   bindTouchEvent() {
-    canvas.addEventListener('touchstart', this.touchStartCallback.bind(this))
-    canvas.addEventListener('touchend', this.touchEndCallback.bind(this))
-    canvas.addEventListener('touchmove', this.touchMoveCallback.bind(this))
+    canvas.addEventListener('touchstart', this.touchStartCallback)
+    canvas.addEventListener('touchend', this.touchEndCallback)
+    canvas.addEventListener('touchmove', this.touchMoveCallback)
   }
 
   removeTouchEvent() {
     canvas.removeEventListener('touchstart', this.touchStartCallback)
     canvas.removeEventListener('touchend', this.touchEndCallback)
+    canvas.removeEventListener('touchmove', this.touchMoveCallback)
   }
 
-  touchMoveCallback(e) {
+  touchMoveCallback = (e) => {
     console.log(window.camera);
     if (window.camera) {
       let directionX = e.touches[0].pageX - this.lastX
@@ -118,7 +152,7 @@ export default class GamePage {
     }
   }
 
-  touchStartCallback(e) {
+  touchStartCallback = (e) => {
     if (window.camera) {
       this.lastX = e.touches[0].pageX
       this.lastY = e.touches[0].pageY
@@ -129,7 +163,7 @@ export default class GamePage {
     this.currentBlock.shrink()
   }
 
-  touchEndCallback() {
+  touchEndCallback = () => {
     if (window.camera) {
       return
     }
@@ -140,8 +174,8 @@ export default class GamePage {
     // 计算弹射
     this.touchEndTime = Date.now()
     const duration = this.touchEndTime - this.touchStartTime
-    this.bottle.velocity.vx = (Math.min(duration * bottleConf.elastic, 400)).toFixed(2)
-    this.bottle.velocity.vy = (Math.min(150 + duration / 20, 400)).toFixed(2)
+    this.bottle.velocity.vx = Number((Math.min(duration * bottleConf.elastic, 400)).toFixed(2))
+    this.bottle.velocity.vy = Number((Math.min(150 + duration / 20, 400)).toFixed(2))
 
     // 停止压缩，恢复状态为stop，并且压缩量重新恢复为1
     this.bottle.stop()
@@ -183,14 +217,14 @@ export default class GamePage {
     let flyingTime = bottle.velocity.vy / gameConf.gravity * 2
 
     // initY是小瓶下压后的Y轴坐标，也就是小瓶起跳时的Y轴坐标
-    initY = initY || bottle.obj.position.y.toFixed(2)
+    initY = initY || Number(bottle.obj.position.y.toFixed(2))
 
     // time为竖直方向上，小瓶起跳点与落脚点之间的距离，小瓶落下这段距离所需要的时间
     var destinationY = blockConf.height / 2
     var differenceY = destinationY
-    var time = ((-bottle.velocity.vy + Math.sqrt(Math.pow(bottle.velocity.vy, 2) - 2 * gameConf.gravity * differenceY)) / -gameConf.gravity).toFixed(2)
+    var time = Number(((-bottle.velocity.vy + Math.sqrt(Math.pow(bottle.velocity.vy, 2) - 2 * gameConf.gravity * differenceY)) / -gameConf.gravity).toFixed(2))
     // flyingTime 与 time 相减后，小瓶在空中的总的飞行时间
-    flyingTime = (flyingTime - time).toFixed(2)
+    flyingTime = Number((flyingTime - time).toFixed(2))
 
     // 跳跃目的地的位置
     let destination = []
@@ -201,8 +235,8 @@ export default class GamePage {
     // 将小球瓶身的坐标与变换的向量相加获取小球瓶身的【预估坐标】
     bottlePossition.add(translate)
     // 缓存向量
-    bottle.destination = [bottlePossition.x.toFixed(2), bottlePossition.y.toFixed(2)]
-    destination.push(bottlePossition.x.toFixed(2), bottlePossition.y.toFixed(2))
+    bottle.destination = [Number(bottlePossition.x.toFixed(2)), Number(bottlePossition.y.toFixed(2))]
+    destination.push(Number(bottlePossition.x.toFixed(2)), Number(bottlePossition.y.toFixed(2)))
 
     const bodyWidth = 1.8141 * bottleConf.headRadius
 
@@ -258,13 +292,13 @@ export default class GamePage {
     this.currentBlock = this.nextBlock
     const targetPosition = this.targetPosition = {}
     if (direction === 0) { // 沿着x轴跳跃
-      targetPosition.x = this.currentBlock.instance.x + distance
-      targetPosition.y = this.currentBlock.instance.y
-      targetPosition.z = this.currentBlock.instance.z
+      targetPosition.x = this.currentBlock.instance.position.x + distance
+      targetPosition.y = this.currentBlock.instance.position.y
+      targetPosition.z = this.currentBlock.instance.position.z
     } else if (direction == 1) { // 沿着z轴跳动
-      targetPosition.x = this.currentBlock.instance.x
-      targetPosition.y = this.currentBlock.instance.y
-      targetPosition.z = this.currentBlock.instance.z - distance
+      targetPosition.x = this.currentBlock.instance.position.x
+      targetPosition.y = this.currentBlock.instance.position.y
+      targetPosition.z = this.currentBlock.instance.position.z - distance
     }
     this.setDirection(direction)
     if (type === 'cuboid') {
@@ -275,10 +309,12 @@ export default class GamePage {
     this.scene.instance.add(this.nextBlock.instance)
     const cameraTargetPosition = {
       x: (this.currentBlock.instance.position.x + this.nextBlock.instance.position.x) / 2,
-      y: (this.currentBlock.instance.position.y + this.neytBlock.instance.position.y) / 2,
-      z: (this.currentBlock.instance.position.z + this.neztBlock.instance.position.z) / 2,
+      y: (this.currentBlock.instance.position.y + this.nextBlock.instance.position.y) / 2,
+      z: (this.currentBlock.instance.position.z + this.nextBlock.instance.position.z) / 2,
     }
+    // 通过场景实例来更新相机和光源位置（带动画）
     this.scene.updateCameraPosition(cameraTargetPosition)
+    // 通过 ground 实例来更新地面坐标（无需动画）
     this.ground.updatePosition(cameraTargetPosition)
   }
 

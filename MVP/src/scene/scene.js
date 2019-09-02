@@ -47,6 +47,11 @@ class Scene {
     this.instance.add(this.axesHelper)
   }
 
+  reset() {
+    this.camera.reset()
+    this.light.reset()
+  }
+
   render() {
     this.renderer.render(this.instance, this.camera.instance)
   }

@@ -14,12 +14,12 @@ class GameView {
 
   showGamePgae() {
     this.gameOverPage.hide()
-    this.gamePage.restart()
     this.gamePage.show()
   }
 
   gameRestart() {
     this.gamePage.restart()
+    this.gameOverPage.hide()
   }
 
   // GameOverPage 相关

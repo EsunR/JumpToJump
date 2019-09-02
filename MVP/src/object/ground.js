@@ -19,6 +19,11 @@ class Ground {
     this.instance.position.y = - 16 / 3.2
   }
 
+  reset() {
+    this.instance.position.x = 0
+    this.instance.position.z = 0
+  }
+
   updatePosition(targetPosition) {
     this.instance.position.x = targetPosition.x
     this.instance.position.z = targetPosition.z

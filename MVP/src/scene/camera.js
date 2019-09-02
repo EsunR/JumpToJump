@@ -1,4 +1,5 @@
 import sceneConf from '../config/scene-conf';
+import { customAnimation } from '../../libs/animation';
 
 class Camera {
   constructor() {
@@ -19,8 +20,8 @@ class Camera {
   }
 
   updatePosition(newTargetPosition) {
-    customAnimation.to(this.instance.position, 0.5, { x: newTargetPosition.x - 10, y: newTargetPosition.y + 10, z: newTargetPosition.z + 10 })
-    customAnimation.to(this.target, 0.5, { x: newTargetPosition.x, y: newTargetPosition.y, z: newTargetPosition.z })
+    customAnimation.to(0.5, this.instance.position, { x: newTargetPosition.x - 10, y: newTargetPosition.y + 10, z: newTargetPosition.z + 10 })
+    customAnimation.to(0.5, this.target, { x: newTargetPosition.x, y: newTargetPosition.y, z: newTargetPosition.z })
   }
 
   reset() {
