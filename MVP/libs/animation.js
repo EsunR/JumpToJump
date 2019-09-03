@@ -10,6 +10,9 @@
 
 import Tween from './tween';
 
+let animationId = -1
+let stoppedAnimationId = animationId - 1
+
 export const customAnimation = {}
 customAnimation.to = function (duration, from, to, type, delay = 0) {
   for (let prop in to) {
@@ -42,6 +45,9 @@ export function TweenAnimation(from, to, duration, type, callback) {
   if (duration) {
     options.duration = duration
   }
+
+  // 赋予一个动画id
+  const selfAnimationId = ++animationId
 
   // 计算动画时间内产生了多少帧画面
   const frameCount = duration * 1000 / 17
@@ -81,10 +87,10 @@ export function TweenAnimation(from, to, duration, type, callback) {
 
     const value = tweenFn(start, from, to - from, frameCount)
 
-    if (start <= frameCount) {
+    if (start <= frameCount && selfAnimationId > stoppedAnimationId) {
       options.callback(value)
       requestAnimationFrame(step)
-    } else {
+    } else if (start > frameCount && selfAnimationId > stoppedAnimationId) {
       // 参数true用于检测该回调是否是完成时的回调函数
       options.callback(to, true)
     }
@@ -93,4 +99,8 @@ export function TweenAnimation(from, to, duration, type, callback) {
   }
 
   step()
+}
+
+export function stopAllAnimation() {
+  stoppedAnimationId = animationId
 }

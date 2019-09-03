@@ -55,9 +55,10 @@ var animate = function () {
   currentAngle = currentAngle + duration / 1000 * Math.PI
 }
 
+
 var render = function () {
-  // animate()
-  // mesh.rotation.set(0, currentAngle, 0);
+  animate()
+  mesh.rotation.set(0, currentAngle, 0);
   renderer.render(scene, camera)
   requestAnimationFrame(render)
 }

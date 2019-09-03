@@ -1,10 +1,11 @@
 // 长方体
 import BaseBlock from './base';
+import blockConf from '../config/block-conf';
 
 export default class Cylinder extends BaseBlock {
-  constructor(x, y, z) {
+  constructor(x, y, z, width = blockConf.width) {
     super('cylinder')
-    const size = this.width
+    const size = width
     const geometry = new THREE.CylinderGeometry(size / 2, size / 2, this.height, 120)
     const material = new THREE.MeshPhongMaterial({
       color: 0xffffff

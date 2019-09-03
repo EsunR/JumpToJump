@@ -8,7 +8,9 @@ import gameConf from '../config/game-conf';
 import utils from '../utils/index';
 import bottleConf from '../config/bottle-conf';
 import ScoreText from '../view3d/scoreText';
+import NormalText from '../view3d/normalText';
 import audioManager from '../modules/audio-manager';
+import { stopAllAnimation, customAnimation } from '../../libs/animation';
 
 // 规定跳跃后的状态
 const GAME_OVER_NORMAL = 0
@@ -116,6 +118,7 @@ export default class GamePage {
         this.checkBottleHit()
       }
     }
+    // 秒帧都进行画面的重新渲染
     requestAnimationFrame(this.render.bind(this))
   }
 
@@ -174,7 +177,7 @@ export default class GamePage {
   }
 
   touchStartCallback = (e) => {
-    if (window.camera) {
+    if (window.camera || this.bottle.status !== 'stop') {
       this.lastX = e.touches[0].pageX
       this.lastY = e.touches[0].pageY
       return
@@ -186,7 +189,7 @@ export default class GamePage {
   }
 
   touchEndCallback = () => {
-    if (window.camera) {
+    if (window.camera || this.bottle.status !== 'shrink') {
       return
     }
 
@@ -314,7 +317,7 @@ export default class GamePage {
     const seed = Math.round(Math.random())
     const type = seed ? 'cuboid' : 'cylinder'
     const direction = Math.round(Math.random()) // 0 -> x 1-> y
-    const width = Math.round(Math.random() * 12) + 8
+    const width = Math.floor(Math.random() * blockConf.width / 2 + 1) + blockConf.width / 2
     const distance = Math.round(Math.random() * 20) + 20
     this.currentBlock = this.nextBlock
     const targetPosition = this.targetPosition = {}
@@ -348,12 +351,10 @@ export default class GamePage {
   checkBottleHit() {
     // 当小瓶的高度小于 block 高度的一半 (注意这里高度之所以为一边是因为block的中心点再(x,y)平面上) 且处于飞行状态意味着小瓶已经凉凉
     if (this.bottle.obj.position.y <= blockConf.height / 2 && this.bottle.status === 'jump' && this.bottle.flyingTime > 0.1) {
+      this.checkingHit = false
       if (this.hit === HIT_CURRENT_BLOCK || this.hit === HIT_NEXT_BLOCK_NORMAL || this.hit === HIT_NEXT_BLOCK_CENTER) {
         this.bottle.stop()
-        this.bottle.obj.position.x = this.bottle.destination[0]
-        this.bottle.obj.position.y = bottleConf.horizontalHeight
-        this.bottle.obj.position.z = this.bottle.destination[1]
-        this.checkingHit = false
+        this.formatPosition()
         if (this.hit === HIT_NEXT_BLOCK_CENTER || this.hit === HIT_NEXT_BLOCK_NORMAL) {
           if (this.hit === HIT_NEXT_BLOCK_CENTER) {
             this.combo++
@@ -369,11 +370,42 @@ export default class GamePage {
         }
       } else { // game over
         console.log(`掉落点坐标：(${this.bottle.obj.position.x.toFixed(2)}, ${this.bottle.obj.position.y.toFixed(2)}, ${this.bottle.obj.position.z.toFixed(2)})`)
-        this.bottle.stop()
+        this.combo = 0
         this.removeTouchEvent()
-        this.callbacks.showGameOverPage()
-        this.checkingHit = false
+
+        // 游戏失败后的动画效果判断
+        if (this.hit === GAME_OVER_NEXT_BLOCK_BACK) {
+          stopAllAnimation()
+          this.bottle.stop()
+          this.formatPosition()
+          this.bottle.hypsokinesis()
+          audioManager.fall_2.play()
+          setTimeout(() => {
+            this.callbacks.showGameOverPage()
+          }, 2000);
+        } else if (this.hit === GAME_OVER_NEXT_BLOCK_FRONT || this.hit === GAME_OVER_CURRENT_BLOCK_FRONT) {
+          stopAllAnimation()
+          this.bottle.stop()
+          this.formatPosition()
+          this.bottle.forerake()
+          audioManager.fall_2.play()
+          setTimeout(() => {
+            this.callbacks.showGameOverPage()
+          }, 2000);
+        } else if (this.hit === GAME_OVER_NORMAL) {
+          audioManager.fall.play()
+          this.bottle.stop()
+          this.callbacks.showGameOverPage()
+        }
       }
     }
+  }
+
+  formatPosition() {
+    console.log('format!');
+    // 瓶身坐标规范
+    this.bottle.obj.position.x = this.bottle.destination[0]
+    this.bottle.obj.position.y = bottleConf.horizontalHeight
+    this.bottle.obj.position.z = this.bottle.destination[1]
   }
 }

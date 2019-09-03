@@ -2,6 +2,7 @@ import bottleConf from '../config/bottle-conf';
 import blockConf from '../config/block-conf';
 import gameConf from '../config/game-conf';
 import { customAnimation } from '../../libs/animation';
+import aduioManager from '../modules/audio-manager';
 
 class Bottle {
   constructor() {
@@ -118,11 +119,8 @@ class Bottle {
 
   reset() {
     this.stop()
-    this.obj.position.set(
-      this.objStartPosition.x,
-      this.objStartPosition.y + 60,
-      this.objStartPosition.z
-    )
+    this.instance = null
+    this.init()
   }
 
   loadTexture() {
@@ -226,11 +224,14 @@ class Bottle {
   }
 
   showup() {
-    customAnimation.to(0.8, this.obj.position, {
+    customAnimation.to(0.5, this.obj.position, {
       x: bottleConf.initPosition.x,
       y: this.objStartPosition.y,
       z: bottleConf.initPosition.z
     }, 'Bounce.easeOut')
+    setTimeout(() => {
+      aduioManager.start.play()
+    }, 500);
   }
 
   jump() {
@@ -246,6 +247,36 @@ class Bottle {
     this.obj.translateY(translateY)
     this.obj.translateOnAxis(this.axis, translateH)
     this.flyingTime = this.flyingTime + t
+  }
+
+  hypsokinesis() {
+    this.status = 'hypsokinesis'
+    setTimeout(() => {
+      if (this.direction == 0) { // 沿x轴跳跃
+        customAnimation.to(0.8, this.obj.rotation, { z: Math.PI / 2 })
+      } else {
+        customAnimation.to(0.8, this.obj.rotation, { x: Math.PI / 2 })
+      }
+      setTimeout(() => {
+        customAnimation.to(0.4, this.obj.position, { y: 1.2 - blockConf.height / 2 })
+        customAnimation.to(0.2, this.head.position, { x: 1.125 })
+        customAnimation.to(0.2, this.head.position, { x: 0 }, 'Linear', 0.2)
+      }, 350);
+    }, 150)
+  }
+
+  forerake() {
+    this.status = 'forerake'
+    setTimeout(() => {
+      if (this.direction == 0) { // 沿x轴跳跃
+        customAnimation.to(0.8, this.obj.rotation, { z: -Math.PI / 2 })
+      } else {
+        customAnimation.to(0.8, this.obj.rotation, { x: -Math.PI / 2 })
+      }
+      setTimeout(() => {
+        customAnimation.to(0.4, this.obj.position, { y: 1.2 - blockConf.height / 2 })
+      }, 350);
+    }, 150)
   }
 }
 
