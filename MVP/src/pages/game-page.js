@@ -26,6 +26,7 @@ export default class GamePage {
     this.targetPosition = {}
     this.checkingHit = false
     this.score = 0
+    this.combo = 0 // 跳到中心双倍加分的combo次数
   }
 
   init() {
@@ -216,7 +217,7 @@ export default class GamePage {
     this.checkingHit = true // render过程开始监视小瓶状态
 
     console.log("预判断碰撞状态：", this.hit);
-    
+
     // 停止播放音频
     audioManager.shrink.stop()
     audioManager.shrink_end.stop()
@@ -354,7 +355,16 @@ export default class GamePage {
         this.bottle.obj.position.z = this.bottle.destination[1]
         this.checkingHit = false
         if (this.hit === HIT_NEXT_BLOCK_CENTER || this.hit === HIT_NEXT_BLOCK_NORMAL) {
-          this.updateScore(++this.score)
+          if (this.hit === HIT_NEXT_BLOCK_CENTER) {
+            this.combo++
+            audioManager[`combo${this.combo <= 8 ? this.combo : '8'}`].play()
+            this.score += 2 * this.combo
+          } else if (this.hit === HIT_NEXT_BLOCK_NORMAL) {
+            this.combo = 0
+            audioManager.success.play()
+            this.score++
+          }
+          this.updateScore(this.score)
           this.updateNextBlock()
         }
       } else { // game over
