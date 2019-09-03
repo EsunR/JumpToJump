@@ -172,7 +172,12 @@ export default class GamePage {
       let camera = this.scene.camera.instance
       let { x, y, z } = camera.position
       camera.position.set(x - directionX / 7, y + directionY / 7, z);
-      camera.lookAt(new THREE.Vector3(0, 0, 0))
+      if (this.cameraTargetPosition) {
+        let { x, y, z } = this.cameraTargetPosition
+        camera.lookAt(x, y, z)
+      } else {
+        camera.lookAt(new THREE.Vector3(0, 0, 0))
+      }
     }
   }
 
@@ -257,7 +262,7 @@ export default class GamePage {
     flyingTime = Number((flyingTime - time).toFixed(2))
 
     // 跳跃目的地的位置
-    let destination = []
+    let destination = this.destination = []
     // 获取小球瓶身在 (x,z) 平面上的二维坐标
     const bottlePossition = new THREE.Vector2(bottle.obj.position.x, bottle.obj.position.z)
     // 将方向向量与移动距离相乘获取变化的距离
@@ -333,8 +338,12 @@ export default class GamePage {
     this.setDirection(direction)
     if (type === 'cuboid') {
       this.nextBlock = new Cuboid(targetPosition.x, targetPosition.y, targetPosition.z, width)
+      let boxHelper = new THREE.BoxHelper(this.nextBlock.instance)
+      this.scene.instance.add(boxHelper)
     } else {
       this.nextBlock = new Cylinder(targetPosition.x, targetPosition.y, targetPosition.z, width)
+      let boxHelper = new THREE.BoxHelper(this.nextBlock.instance)
+      this.scene.instance.add(boxHelper)
     }
     this.scene.instance.add(this.nextBlock.instance)
     const cameraTargetPosition = {
@@ -342,6 +351,7 @@ export default class GamePage {
       y: (this.currentBlock.instance.position.y + this.nextBlock.instance.position.y) / 2,
       z: (this.currentBlock.instance.position.z + this.nextBlock.instance.position.z) / 2,
     }
+    this.cameraTargetPosition = cameraTargetPosition
     // 通过场景实例来更新相机和光源位置（带动画）
     this.scene.updateCameraPosition(cameraTargetPosition)
     // 通过 ground 实例来更新地面坐标（无需动画）
@@ -402,10 +412,11 @@ export default class GamePage {
   }
 
   formatPosition() {
-    console.log('format!');
+    console.log('befor format：', this.bottle.obj.position);
     // 瓶身坐标规范
-    this.bottle.obj.position.x = this.bottle.destination[0]
+    this.bottle.obj.position.x = this.destination[0]
     this.bottle.obj.position.y = bottleConf.horizontalHeight
-    this.bottle.obj.position.z = this.bottle.destination[1]
+    this.bottle.obj.position.z = this.destination[1]
+    console.log('format：', this.bottle.obj.position);
   }
 }
