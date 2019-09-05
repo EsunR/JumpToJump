@@ -72,13 +72,6 @@ class Scene {
     scoreInstance.position.x = 10 - this.sceneWidth / 2
     scoreInstance.position.y = this.sceneHeight / 2 - 15
   }
-
-  updateScore(scoreInstance) {
-    // 移除分数实例
-    this.camera.instance.remove(this.currentScore)
-    // 添加更新过的分数实例，实现视图的更新
-    this.addScore(scoreInstance)
-  }
 }
 
 export default new Scene()

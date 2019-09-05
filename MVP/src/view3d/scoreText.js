@@ -26,11 +26,10 @@ export default class ScoreText {
 
   updateScore(score) {
     const scoreStr = score.toString()
-    const geometry = new THREE.TextGeometry(scoreStr, {
+    this.instance.geometry = new THREE.TextGeometry(scoreStr, {
       "font": font,
       "size": 6.0,
       "height": 0.1
     })
-    this.instance = new THREE.Mesh(geometry, this.material)
   }
 }

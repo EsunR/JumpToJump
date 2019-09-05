@@ -8,6 +8,9 @@ class GameController {
     this.gameModel.stageChange.attach((sender, args) => {
       const stageName = args.stage
       switch (stageName) {
+        case 'game-start':
+          this.gameView.showGameStartPage()
+          break
         case 'game-over':
           this.gameView.showGameOverPage()
           break
@@ -21,6 +24,12 @@ class GameController {
   }
 
   initPages() {
+    const gameStartPageCallbacks = {
+      gameRestart: () => {
+        console.log("Emit CallBacks gameRestart");
+        this.gameModel.setStage('game')
+      }
+    }
     const gamePageCallbacks = {
       showGameOverPage: () => {
         console.log("Emit CallBacks showGameOverPage");
@@ -37,6 +46,7 @@ class GameController {
     // 注入的callbaks最终传入到页面实例上
     this.gameView.initGamePage(gamePageCallbacks)
     this.gameView.initGameOverPage(gameOverPageCallbacks)
+    this.gameView.initGameStartPage(gameStartPageCallbacks)
   }
 }
 

@@ -10,7 +10,7 @@ var basicMaterial = new THREE.MeshPhongMaterial()
 
 // 相机
 var camera = new THREE.OrthographicCamera(-width / 2, width / 2, height / 2, -height / 2, -1000, 1000)
-camera.position.set(100, 0, 0)
+camera.position.set(100, 100, 100)
 camera.lookAt(0, 0, 0)
 scene.add(camera)
 
@@ -51,10 +51,10 @@ scene.add(shadowLight)
 var boxHelper = new THREE.BoxHelper(bottle, 0xffff00)
 scene.add(boxHelper)
 
-bottle.rotateX(1)
-bottle.position.y = 52
-bottle.position.z = 25
-
+this.bottle.rotateX(1)
+console.log(this.bottle.rotation.x);
+this.bottle.rotation.set(0, 0, 0)
+console.log(this.bottle.rotation.x);
 
 function animate() {
   renderer.render(scene, camera)

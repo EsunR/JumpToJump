@@ -8,9 +8,8 @@ import gameConf from '../config/game-conf';
 import utils from '../utils/index';
 import bottleConf from '../config/bottle-conf';
 import ScoreText from '../view3d/scoreText';
-import NormalText from '../view3d/normalText';
 import audioManager from '../modules/audio-manager';
-import { stopAllAnimation, customAnimation } from '../../libs/animation';
+import { stopAllAnimation } from '../../libs/animation';
 
 // 规定跳跃后的状态
 const GAME_OVER_NORMAL = 0
@@ -81,8 +80,6 @@ export default class GamePage {
   updateScore(score) {
     // 替换内部文字实例
     this.scoreText.updateScore(score)
-    // 移除场景中原有的文字，将新的文字渲染到屏幕上
-    this.scene.updateScore(this.scoreText.instance)
   }
 
   deleteObjectsfromScene() {
@@ -338,12 +335,8 @@ export default class GamePage {
     this.setDirection(direction)
     if (type === 'cuboid') {
       this.nextBlock = new Cuboid(targetPosition.x, targetPosition.y, targetPosition.z, width)
-      let boxHelper = new THREE.BoxHelper(this.nextBlock.instance)
-      this.scene.instance.add(boxHelper)
     } else {
       this.nextBlock = new Cylinder(targetPosition.x, targetPosition.y, targetPosition.z, width)
-      let boxHelper = new THREE.BoxHelper(this.nextBlock.instance)
-      this.scene.instance.add(boxHelper)
     }
     this.scene.instance.add(this.nextBlock.instance)
     const cameraTargetPosition = {
@@ -370,10 +363,12 @@ export default class GamePage {
             this.combo++
             audioManager[`combo${this.combo <= 8 ? this.combo : '8'}`].play()
             this.score += 2 * this.combo
+            this.bottle.showAddScore(2 * this.combo) // 瓶身头顶出现 +2*combo 数字
           } else if (this.hit === HIT_NEXT_BLOCK_NORMAL) {
             this.combo = 0
             audioManager.success.play()
             this.score++
+            this.bottle.showAddScore(1) // 瓶身头顶出现 +1 数字
           }
           this.updateScore(this.score)
           this.updateNextBlock()
@@ -386,8 +381,8 @@ export default class GamePage {
         // 游戏失败后的动画效果判断
         if (this.hit === GAME_OVER_NEXT_BLOCK_BACK) {
           stopAllAnimation()
-          this.bottle.stop()
           this.formatPosition()
+          this.bottle.stop()
           this.bottle.hypsokinesis()
           audioManager.fall_2.play()
           setTimeout(() => {
@@ -395,8 +390,8 @@ export default class GamePage {
           }, 2000);
         } else if (this.hit === GAME_OVER_NEXT_BLOCK_FRONT || this.hit === GAME_OVER_CURRENT_BLOCK_FRONT) {
           stopAllAnimation()
-          this.bottle.stop()
           this.formatPosition()
+          this.bottle.stop()
           this.bottle.forerake()
           audioManager.fall_2.play()
           setTimeout(() => {
@@ -408,15 +403,13 @@ export default class GamePage {
           this.callbacks.showGameOverPage()
         }
       }
+      this.bottle.scatterParticles()
     }
   }
 
   formatPosition() {
-    console.log('befor format：', this.bottle.obj.position);
     // 瓶身坐标规范
-    this.bottle.obj.position.x = this.destination[0]
-    this.bottle.obj.position.y = bottleConf.horizontalHeight
-    this.bottle.obj.position.z = this.destination[1]
-    console.log('format：', this.bottle.obj.position);
+    this.bottle.obj.position.set(this.destination[0], bottleConf.horizontalHeight, this.destination[1])
+    this.bottle.obj.rotation.set(0, 0, 0)
   }
 }

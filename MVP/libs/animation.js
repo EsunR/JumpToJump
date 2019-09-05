@@ -14,13 +14,16 @@ let animationId = -1
 let stoppedAnimationId = animationId - 1
 
 export const customAnimation = {}
-customAnimation.to = function (duration, from, to, type, delay = 0) {
+customAnimation.to = function (duration, from, to, type, delay = 0, complateCallback) {
   for (let prop in to) {
     if (from[prop] !== undefined) {
       setTimeout(() => {
         TweenAnimation(from[prop], to[prop], duration, type, (value, complete) => {
           // 将新的坐标值应用于对象
           from[prop] = value
+          if (complete && complateCallback) {
+            complateCallback(value)
+          }
         })
       }, delay * 1000)
     }

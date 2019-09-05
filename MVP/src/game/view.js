@@ -1,5 +1,6 @@
 import GamePage from '../pages/game-page';
 import GameOverPage from '../pages/game-over-page';
+import GameStartPage from '../pages/game-start-page';
 
 class GameView {
   constructor() {
@@ -32,6 +33,18 @@ class GameView {
 
   showGameOverPage() {
     this.gameOverPage.show()
+  }
+
+  // GameStartPage 相关
+  initGameStartPage(callbacks) {
+    this.gameStartPage = new GameStartPage(callbacks)
+    this.gameStartPage.init({
+      scene: this.gamePage.scene
+    })
+  }
+
+  showGameOverPage(){
+    this.gameStartPage.show()
   }
 }
 

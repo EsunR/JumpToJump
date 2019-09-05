@@ -1,8 +1,9 @@
 import bottleConf from '../config/bottle-conf';
 import blockConf from '../config/block-conf';
 import gameConf from '../config/game-conf';
-import { customAnimation } from '../../libs/animation';
+import { customAnimation, TweenAnimation } from '../../libs/animation';
 import aduioManager from '../modules/audio-manager';
+import ScoreText from '../view3d/scoreText';
 
 class Bottle {
   constructor() {
@@ -20,6 +21,7 @@ class Bottle {
   }
 
   init() {
+    this.loader = new THREE.TextureLoader() // 加载纹理
     const headRadius = bottleConf.headRadius
 
     // bottle分为多个部分，Object3D可以将各部分作为一个整体操作
@@ -38,14 +40,11 @@ class Bottle {
     // 用来做动画的对象
     this.human = new THREE.Object3D
 
-
     // 加载纹理
     const { specularMaterial, middleMaterial, bottomMaterial } = this.loadTexture()
 
-
     // 用bottle呈放head与body
     this.bottle = new THREE.Object3D()
-
 
     // 设置head的信息
     this.head = new THREE.Mesh(
@@ -58,10 +57,8 @@ class Bottle {
     this.head.position.z = 0
     this.head.castShadow = true
 
-
     // 用body呈放middle与bottom
     this.body = new THREE.Object3D()
-
 
     // 设置top信息
     let topGeometry = new THREE.SphereGeometry(headRadius / 1.4, 20, 20)
@@ -75,7 +72,6 @@ class Bottle {
     this.top.position.x = 0
     this.top.position.z = 0
 
-
     // 设置middle的信息
     this.middle = new THREE.Mesh(
       new THREE.CylinderGeometry(
@@ -85,7 +81,6 @@ class Bottle {
     )
     this.middle.castShadow = true
     this.middle.position.y = 1.3857 * headRadius
-
 
     // 设置bottom的信息
     this.bottom = new THREE.Mesh(
@@ -113,8 +108,60 @@ class Bottle {
     this.bottle.add(this.human)
     this.obj.add(this.bottle)
 
-
     this.instance = this.obj
+
+    // 添加粒子
+    this.particles = []
+    const particleGeometry = new THREE.PlaneGeometry(2, 2)
+    const whiteParticleMaterial = new THREE.MeshBasicMaterial({
+      map: this.loader.load('/game/res/images/white.png'),
+      alphaTest: 0.5
+    })
+    const greenParticleMaterial = new THREE.MeshBasicMaterial({
+      map: this.loader.load('/game/res/images/green.png'),
+      alphaTest: 0.5
+    })
+    // 创建15个白色粒子，5个绿色粒子
+    for (let i = 0; i < 15; i++) {
+      const particle = new THREE.Mesh(particleGeometry, whiteParticleMaterial)
+      particle.position.x = -Math.PI / 4
+      particle.position.y = -Math.PI / 5
+      particle.position.z = -Math.PI / 5
+      particle.rotateY(-Math.PI / 4)
+      particle.rotateX(-Math.PI / 4)
+      this.particles.push(particle)
+      this.obj.add(particle)
+    }
+    for (let i = 0; i < 5; i++) {
+      const particle = new THREE.Mesh(particleGeometry, greenParticleMaterial)
+      particle.position.x = -Math.PI / 4
+      particle.position.y = -Math.PI / 5
+      particle.position.z = -Math.PI / 5
+      particle.rotateY(-Math.PI / 4)
+      particle.rotateX(-Math.PI / 4)
+      this.particles.push(particle)
+      this.obj.add(particle)
+    }
+
+    // 添加分数指示标
+    this.scoreText = new ScoreText()
+    this.scoreText.init({
+      fillStyle: 0x252525
+    })
+    this.scoreText.instance.visible = false
+    this.scoreText.instance.rotation.y = -Math.PI / 4
+    this.scoreText.instance.scale.set(0.5, 0.5, 0.5)
+    this.obj.add(this.scoreText.instance)
+  }
+
+  showAddScore(score) {
+    const value = '+' + score
+    this.scoreText.updateScore(value)
+    this.scoreText.instance.visible = true
+    this.scoreText.instance.position.y = 3
+    this.scoreText.instance.material.opacity = 1
+    customAnimation.to(0.5, this.scoreText.instance.position, { y: blockConf.height + 6 })
+    customAnimation.to(0.5, this.scoreText.instance.material, { opacity: 0 })
   }
 
   reset() {
@@ -124,8 +171,6 @@ class Bottle {
   }
 
   loadTexture() {
-    // 加载纹理
-    this.loader = new THREE.TextureLoader()
     // 加载高光材质
     this.specularTexture = this.loader.load('/game/res/images/head.png') // 资源加载的相对路径是以 /game 开始
     this.specularTexture.minFilter = THREE.NearestFilter
@@ -170,18 +215,18 @@ class Bottle {
     this.human.rotation.z = this.human.rotation.x = 0
     // direction 0 沿x轴跳跃
     if (this.direction == 0) { // x
-      customAnimation.to(0.14, this.human.rotation, { z: this.human.rotation.z - Math.PI })
-      customAnimation.to(0.18, this.human.rotation, { z: this.human.rotation.z - 2 * Math.PI }, 'Linear', 0.14)
+      customAnimation.to(0.07, this.human.rotation, { z: this.human.rotation.z - Math.PI })
+      customAnimation.to(0.1, this.human.rotation, { z: this.human.rotation.z - 2 * Math.PI }, 'Linear', 0.14)
       customAnimation.to(0.1, this.head.position, { y: this.head.position.y + 0.9 * scale, x: this.head.position.x + 0.45 * scale })
       customAnimation.to(0.1, this.head.position, { y: this.head.position.y - 0.9 * scale, x: this.head.position.x - 0.45 * scale }, null, 0.1)
       customAnimation.to(0.15, this.head.position, { y: 7.56, x: 0 }, null, 0.25)
-      customAnimation.to(0.1, this.body.scale, { y: Math.max(scale, 1), x: Math.max(Math.min(1 / scale, 1), 0.7), z: Math.max(Math.min(1 / scale, 1), 0.7) })
-      customAnimation.to(0.1, this.body.scale, { y: Math.min(0.9 / scale, 0.7), x: Math.max(scale, 1.2), z: Math.max(scale, 1.2) }, null, 0.1)
-      customAnimation.to(0.3, this.body.scale, { y: 1, x: 1, z: 1 }, null, 0.2)
+      customAnimation.to(0.05, this.body.scale, { y: Math.max(scale, 1), x: Math.max(Math.min(1 / scale, 1), 0.7), z: Math.max(Math.min(1 / scale, 1), 0.7) })
+      customAnimation.to(0.05, this.body.scale, { y: Math.min(0.9 / scale, 0.7), x: Math.max(scale, 1.2), z: Math.max(scale, 1.2) }, null, 0.1)
+      customAnimation.to(0.2, this.body.scale, { y: 1, x: 1, z: 1 }, null, 0.2)
     } else if (this.direction == 1) { // z
       // direction 0 沿z轴跳跃
-      customAnimation.to(0.14, this.human.rotation, { x: this.human.rotation.x - Math.PI })
-      customAnimation.to(0.18, this.human.rotation, { x: this.human.rotation.x - 2 * Math.PI }, null, 0.14)
+      customAnimation.to(0.07, this.human.rotation, { x: this.human.rotation.x - Math.PI })
+      customAnimation.to(0.1, this.human.rotation, { x: this.human.rotation.x - 2 * Math.PI }, null, 0.14)
       customAnimation.to(0.1, this.head.position, { y: this.head.position.y + 0.9 * scale, z: this.head.position.z - 0.45 * scale })
       customAnimation.to(0.1, this.head.position, { z: this.head.position.z + 0.45 * scale, y: this.head.position.y - 0.9 * scale }, null, 0.1)
       customAnimation.to(0.15, this.head.position, { y: 7.56, z: 0 }, null, 0.25)
@@ -197,6 +242,7 @@ class Bottle {
 
   shrink() {
     this.status = 'shrink'
+    this.gatherParticles()
   }
 
   _shrink() {
@@ -237,6 +283,7 @@ class Bottle {
   jump() {
     this.flyingTime = 0
     this.status = 'jump'
+    this.resetGatherParticles()
   }
 
   _jump(tickTime) {
@@ -249,6 +296,7 @@ class Bottle {
     this.flyingTime = this.flyingTime + t
   }
 
+  // 瓶身后倾动画
   hypsokinesis() {
     this.status = 'hypsokinesis'
     setTimeout(() => {
@@ -265,6 +313,7 @@ class Bottle {
     }, 150)
   }
 
+  // 瓶身前倾动画
   forerake() {
     this.status = 'forerake'
     setTimeout(() => {
@@ -278,6 +327,109 @@ class Bottle {
       }, 350);
     }, 150)
   }
+
+  // 粒子内聚动画
+  gatherParticles() {
+    // 生成粒子并调用粒子动画
+    for (let i = 10; i < 20; i++) {
+      this.particles[i].gathering = true // 内聚状态
+      this.particles[i].scattering = false // 外散状态
+      this._gatherParticles(this.particles[i])
+    }
+    this.gatherTime = setTimeout(() => {
+      for (let i = 0; i < 10; i++) {
+        this.particles[i].gathering = true
+        this.particles[i].scattering = false
+        this._gatherParticles(this.particles[i])
+      }
+    }, 500 + 1000 * Math.random());
+  }
+
+  _gatherParticles(particle) {
+    // 设置粒子出现的距离
+    const minDistance = 1
+    const maxDistance = 8
+    // 初始化粒子
+    particle.scale.set(1, 1, 1)
+    particle.visible = false
+    // 由 x,z 决定粒子出现的象限
+    const x = Math.random() > 0.5 ? 1 : -1
+    const z = Math.random() > 0.5 ? 1 : -1
+    // 初始化粒子位置
+    particle.position.x = (minDistance + (maxDistance - minDistance) * Math.random()) * x
+    particle.position.y = minDistance + (maxDistance - minDistance) * Math.random()
+    particle.position.z = (minDistance + (maxDistance - minDistance) * Math.random()) * z
+
+    setTimeout(() => {
+      if (!particle.gathering) return
+      particle.visible = true
+      const duration = 0.5 + Math.random() * 0.4
+      customAnimation.to(duration, particle.scale, {
+        x: 0.8 + Math.random(),
+        y: 0.8 + Math.random(),
+        z: 0.8 + Math.random()
+      })
+      customAnimation.to(duration, particle.position, {
+        x: Math.random() * x,
+        y: Math.random() * 2.5,
+        z: Math.random() * z
+      }, undefined, 0, () => {
+        if (particle.gathering) {
+          this._gatherParticles(particle)
+        }
+      })
+    }, Math.random() * 500);
+  }
+
+  resetGatherParticles() {
+    if (this.gatherTime) {
+      clearTimeout(this.gatherTime)
+    }
+    this.gatherTime = null
+    for (let i = 0; i < this.particles.length; i++) {
+      this.particles[i].gathering = false
+      this.particles[i].scattering = false
+      this.particles[i].visible = false
+    }
+  }
+
+  scatterParticles() {
+    for (let i = 0; i < 10; i++) {
+      this.particles[i].scattering = true
+      this.particles[i].gathering = false
+      this._scatterParticle(this.particles[i])
+    }
+  }
+
+  _scatterParticle(particle) {
+    const minDistance = bottleConf.bodyWidth / 2
+    const maxDistance = 2
+    const x = (minDistance + Math.random() * (maxDistance - minDistance)) * (1 - 2 * Math.random())
+    const z = (minDistance + Math.random() * (maxDistance - minDistance)) * (1 - 2 * Math.random())
+    particle.scale.set(1, 1, 1)
+    particle.visible = false
+    particle.position.x = x
+    particle.position.y = -0.5
+    particle.position.z = z
+
+    if (!particle.scattering) return
+    particle.visible = true
+    const duration = 0.1 + Math.random() * 0.2
+    customAnimation.to(duration, particle.scale, {
+      x: 0.2,
+      y: 0.2,
+      z: 0.2
+    })
+    customAnimation.to(duration, particle.position, {
+      x: 2 * x,
+      y: Math.random() * 2.5 + 2,
+      z: 2 * z
+    }, undefined, 0, () => {
+      particle.scattering = false
+      particle.visible = false
+    })
+  }
+
 }
 
 export default new Bottle()
