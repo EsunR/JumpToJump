@@ -12,7 +12,7 @@ class GameController {
           this.gameView.showGameStartPage()
           break
         case 'game-over':
-          this.gameView.showGameOverPage()
+          this.gameView.showGameOverPage(this.newScore)
           break
         case 'game':
           this.gameView.gameRestart()
@@ -31,8 +31,9 @@ class GameController {
       }
     }
     const gamePageCallbacks = {
-      showGameOverPage: () => {
+      showGameOverPage: (newScore) => {
         console.log("Emit CallBacks showGameOverPage");
+        this.newScore = newScore
         this.gameModel.setStage('game-over')
       }
     }
@@ -47,6 +48,8 @@ class GameController {
     this.gameView.initGamePage(gamePageCallbacks)
     this.gameView.initGameOverPage(gameOverPageCallbacks)
     this.gameView.initGameStartPage(gameStartPageCallbacks)
+
+
   }
 }
 

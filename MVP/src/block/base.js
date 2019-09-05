@@ -41,6 +41,14 @@ export default class BaseBlock {
     this.status = 'shrink'
   }
 
+  showup() {
+    this.status = 'showup'
+    this.instance.position.y = 60
+    customAnimation.to(0.3, this.instance.position, {
+      y: 0
+    }, 'Bounce.easeOut')
+  }
+
   getVertices() {
     const vertices = []
     const centerPosition = {

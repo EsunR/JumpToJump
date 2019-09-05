@@ -12,6 +12,5 @@ export default {
   headRadius,
   bodyWidth: 3.84,
   horizontalHeight: (1.91423 * headRadius) / 2 + blockConf.height / 2,
-  // 弹性系数，弹性系数约大，平面的弹力越强
-  elastic: 0.13
+  elastic: 0.1 // 弹性系数，弹性系数约大，平面的弹力越强
 }

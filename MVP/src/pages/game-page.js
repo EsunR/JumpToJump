@@ -9,7 +9,7 @@ import utils from '../utils/index';
 import bottleConf from '../config/bottle-conf';
 import ScoreText from '../view3d/scoreText';
 import audioManager from '../modules/audio-manager';
-import { stopAllAnimation } from '../../libs/animation';
+import { stopAllAnimation, customAnimation } from '../../libs/animation';
 
 // 规定跳跃后的状态
 const GAME_OVER_NORMAL = 0
@@ -52,7 +52,6 @@ export default class GamePage {
     this.scoreText.init({
       fillStyle: 0x666699
     })
-    this.addScore()
 
     // 进行场景的渲染
     this.render()
@@ -62,13 +61,19 @@ export default class GamePage {
     this.bindTouchEvent() // 绑定点击事件
     this.deleteObjectsfromScene() // 删除场景中的所有物体
 
+    // 初始化场景物体的参数
     this.scene.reset() // 在scene中去初始化相机和光线的位置
     this.bottle.reset() // 初始化bottle的所有状态
     this.ground.reset() // 初始化地面状态
+    this.scoreText.reset() // 初始化分数
+    this.score = 0
+    this.combo = 0
 
+    // 重新加入移除的物体
     this.addInitBlock()
     this.addGround()
     this.addBottle()
+    this.addScore()
   }
 
   addScore() {
@@ -81,9 +86,8 @@ export default class GamePage {
   }
 
   deleteObjectsfromScene() {
-    // 获取场景中的一个 block 对象
-    let obj = this.scene.instance.getObjectByName('block')
-    let count = 0
+    // 移除场景中的所有 block
+    let obj = this.scene.instance.getObjectByName('block') // 获取场景中的一个 block 对象
     while (obj) {
       this.scene.instance.remove(obj)
       if (obj.geometry) {
@@ -94,11 +98,12 @@ export default class GamePage {
       }
       // 将对象 obj 迭代为下一个blcok
       obj = this.scene.instance.getObjectByName('block')
-      count++
     }
-    // 对于已经是实例化的 bottle 和 ground 只是将其移出场景
+
+    // 移除场景中的其他物体
     this.scene.instance.remove(this.bottle.obj)
     this.scene.instance.remove(this.ground.instance)
+    this.scene.instance.remove(this.scoreText.instance)
   }
 
   render() {
@@ -347,6 +352,8 @@ export default class GamePage {
     this.scene.updateCameraPosition(cameraTargetPosition)
     // 通过 ground 实例来更新地面坐标（无需动画）
     this.ground.updatePosition(cameraTargetPosition)
+    // 方块掉落
+    this.nextBlock.showup()
   }
 
   checkBottleHit() {
@@ -393,12 +400,13 @@ export default class GamePage {
           this.bottle.forerake()
           audioManager.fall_2.play()
           setTimeout(() => {
-            this.callbacks.showGameOverPage()
+            this.saveGameScore()
           }, 2000);
         } else if (this.hit === GAME_OVER_NORMAL) {
           audioManager.fall.play()
           this.bottle.stop()
-          this.callbacks.showGameOverPage()
+          customAnimation.to(0.2, this.bottle.instance.position, { y: -blockConf.height / 2 })
+          this.saveGameScore()
         }
       }
       this.bottle.scatterParticles()
@@ -409,5 +417,20 @@ export default class GamePage {
     // 瓶身坐标规范
     this.bottle.obj.position.set(this.destination[0], bottleConf.horizontalHeight, this.destination[1])
     this.bottle.obj.rotation.set(0, 0, 0)
+  }
+
+  saveGameScore() {
+    let heighScore = window.localStorage.getItem("HighScore")
+    if (!heighScore) {
+      window.localStorage.setItem("HighScore", this.score)
+      this.callbacks.showGameOverPage(true) // 荣获最高分
+    } else {
+      if (heighScore < this.score) {
+        window.localStorage.setItem("HighScore", this.score)
+        this.callbacks.showGameOverPage(true) // 荣获最高分
+      } else {
+        this.callbacks.showGameOverPage(false) // 没有打破历史记录
+      }
+    }
   }
 }

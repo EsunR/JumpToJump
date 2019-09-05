@@ -32,8 +32,8 @@ class GameView {
     })
   }
 
-  showGameOverPage() {
-    this.gameOverPage.show()
+  showGameOverPage(newScore) {
+    this.gameOverPage.show(newScore)
   }
 
   // GameStartPage 相关

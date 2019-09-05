@@ -1,4 +1,5 @@
 import sceneConf from '../config/scene-conf';
+import audioManager from '../modules/audio-manager';
 
 export default class GameStartPage {
   constructor(callbacks) {
@@ -7,6 +8,7 @@ export default class GameStartPage {
 
   init(options) {
     this.initGameStartCanvas(options)
+    this.clearHistoryScore()
   }
 
   initGameStartCanvas(options) {
@@ -63,11 +65,9 @@ export default class GameStartPage {
         this.canvas.height * 0.6, this.canvas.height * 0.6 + this.canvas.width * 0.5 * imgAspect // 竖直范围
       ]
     }
-
     // 检测用户点击
     this.bindTouchEvent()
-
-
+    audioManager.icon.play()
     this.camera.add(this.obj)
   }
 
@@ -95,5 +95,9 @@ export default class GameStartPage {
     if (pageX > this.startBtnRegion[0] && pageX < this.startBtnRegion[1] && pageY > this.startBtnRegion[2] && pageY < this.startBtnRegion[3]) {
       this.callbacks.gameRestart()
     }
+  }
+
+  clearHistoryScore() {
+    window.localStorage.clear()
   }
 }

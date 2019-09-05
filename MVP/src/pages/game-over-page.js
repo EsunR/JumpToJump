@@ -5,8 +5,10 @@ export default class GameOverPage {
     this.callbacks = callbacks
   }
 
-  show() {
+  show(newScore) {
     this.obj.visible = true
+    this.newScore = newScore
+    this.drawCanvas()
     this.bindTouchEvent()
   }
 
@@ -38,12 +40,6 @@ export default class GameOverPage {
     this.obj.visible = false
     this.obj.position.z = 20
     this.context = this.canvas.getContext('2d')
-    this.context.fillStyle = '#333'
-    this.context.fillRect((window.innerWidth - 200) / 2, (window.innerHeight - 100) / 2, 200, 100)
-    this.context.fillStyle = '#eee'
-    this.context.font = '20px Georgia'
-    this.context.fillText('Game Over', (window.innerWidth - 200) / 2 + 50, (window.innerHeight - 100) / 2 + 55)
-    this.texture.needsUpdate = true
     this.obj.visible = false
     this.camera.add(this.obj)
   }
@@ -62,5 +58,22 @@ export default class GameOverPage {
 
   removeTouchEvent() {
     canvas.removeEventListener('touchend', this.onTouchEnd)
+  }
+
+  drawCanvas() {
+    // TODO: 绘制分数结算屏
+    // 清屏
+    this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
+
+    this.context.fillStyle = '#333'
+    this.context.fillRect((window.innerWidth - 200) / 2, (window.innerHeight - 100) / 2, 200, 100)
+    this.context.fillStyle = '#eee'
+    this.context.font = '20px Georgia'
+    if (this.newScore) {
+      this.context.fillText('历史最高分', (window.innerWidth - 200) / 2 + 50, (window.innerHeight - 100) / 2 + 55)
+    } else {
+      this.context.fillText('不是历史最高分', (window.innerWidth - 200) / 2 + 50, (window.innerHeight - 100) / 2 + 55)
+    }
+    this.texture.needsUpdate = true
   }
 }

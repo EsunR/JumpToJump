@@ -32,4 +32,12 @@ export default class ScoreText {
       "height": 0.1
     })
   }
+
+  reset() {
+    this.instance.geometry = new THREE.TextGeometry('0', {
+      "font": font,
+      "size": 6.0,
+      "height": 0.1
+    })
+  }
 }
