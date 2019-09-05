@@ -31,7 +31,7 @@ export default class GameOverPage {
     this.canvas = document.createElement('canvas')
     this.canvas.width = window.innerWidth
     this.canvas.height = window.innerHeight
-    this.texture = new THREE.Texture(this.canvas)
+    this.texture = new THREE.CanvasTexture(this.canvas)
     this.material = new THREE.MeshBasicMaterial({ map: this.texture, transparent: true });
     this.geometry = new THREE.PlaneGeometry(sceneConf.frustumSize * 2, aspect * sceneConf.frustumSize * 2)
     this.obj = new THREE.Mesh(this.geometry, this.material)

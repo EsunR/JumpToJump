@@ -47,8 +47,8 @@ class Scene {
     }
 
     // 创建一个 axesHelper 添加到场景中
-    this.axesHelper = new THREE.AxesHelper(100)
-    this.instance.add(this.axesHelper)
+    // this.axesHelper = new THREE.AxesHelper(100)
+    // this.instance.add(this.axesHelper)
   }
 
   reset() {

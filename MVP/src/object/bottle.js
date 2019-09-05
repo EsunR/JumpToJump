@@ -33,7 +33,7 @@ class Bottle {
     this.objStartPosition = { x, y, z }
     this.obj.position.set(
       this.objStartPosition.x,
-      this.objStartPosition.y + 60,
+      this.objStartPosition.y + 80,
       this.objStartPosition.z
     )
 

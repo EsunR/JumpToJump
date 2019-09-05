@@ -21,6 +21,7 @@ class GameView {
   gameRestart() {
     this.gamePage.restart()
     this.gameOverPage.hide()
+    this.gameStartPage.hide()
   }
 
   // GameOverPage 相关
@@ -42,8 +43,8 @@ class GameView {
       scene: this.gamePage.scene
     })
   }
-
-  showGameOverPage(){
+  
+  showGameStartPage() {
     this.gameStartPage.show()
   }
 }

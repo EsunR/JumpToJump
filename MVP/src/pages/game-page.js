@@ -40,10 +40,9 @@ export default class GamePage {
     this.ground.init()
     this.addGround()
 
-    // 挂载、添加 bottle 到场景中
+    // 挂载、添加 bottle (先不把bottle添加到场景)
     this.bottle = bottle
     this.bottle.init()
-    this.addBottle()
 
     // 初始化并添加block到场景中
     this.addInitBlock()
@@ -55,22 +54,21 @@ export default class GamePage {
     })
     this.addScore()
 
-    // 绑定点击事件
-    this.bindTouchEvent()
-
     // 进行场景的渲染
     this.render()
   }
 
   restart() {
+    this.bindTouchEvent() // 绑定点击事件
     this.deleteObjectsfromScene() // 删除场景中的所有物体
+
     this.scene.reset() // 在scene中去初始化相机和光线的位置
-    this.bottle.reset()
-    this.ground.init()
+    this.bottle.reset() // 初始化bottle的所有状态
+    this.ground.reset() // 初始化地面状态
+
     this.addInitBlock()
     this.addGround()
     this.addBottle()
-    this.bindTouchEvent()
   }
 
   addScore() {
