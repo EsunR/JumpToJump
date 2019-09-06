@@ -8,7 +8,7 @@ export default class GameStartPage {
 
   init(options) {
     this.initGameStartCanvas(options)
-    this.clearHistoryScore()
+    this.checkLocalStorage()
   }
 
   initGameStartCanvas(options) {
@@ -25,7 +25,7 @@ export default class GameStartPage {
     this.material = new THREE.MeshBasicMaterial({ map: this.texture, transparent: true })
     this.geometry = new THREE.PlaneGeometry(sceneConf.frustumSize * 2, aspect * sceneConf.frustumSize * 2)
     this.obj = new THREE.Mesh(this.geometry, this.material)
-    this.obj.position.z = 60
+    this.obj.position.z = 80
 
     // 绘制背景
     context.fillStyle = 'rgba(0, 0, 0, 0.5)'
@@ -97,7 +97,11 @@ export default class GameStartPage {
     }
   }
 
-  clearHistoryScore() {
-    window.localStorage.clear()
+  checkLocalStorage() {
+    if (window.localStorage.getItem("CurrentScore") === null || !window.localStorage.getItem("HighScore") === null) {
+      console.log("分数重置");
+      window.localStorage.setItem("CurrentScore", 0)
+      window.localStorage.setItem("HighScore", 0)
+    }
   }
 }

@@ -5,7 +5,7 @@ import blockConf from '../config/block-conf';
 export default class Cylinder extends BaseBlock {
   constructor(x, y, z, width = blockConf.width, name = 'color') {
     super('cylinder')
-    const size = width
+    const size = this.size = width
     if (name === 'color') {
       const seed = Math.floor(Math.random() * 6)
       let currentColor

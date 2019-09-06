@@ -1,19 +1,25 @@
 import sceneConf from '../config/scene-conf'
+import ScoreText from '../view3d/scoreText';
 
 export default class GameOverPage {
   constructor(callbacks) {
     this.callbacks = callbacks
+    this.newScore = false
+    this.height = window.innerHeight
+    this.width = window.innerWidth
   }
 
   show(newScore) {
     this.obj.visible = true
     this.newScore = newScore
     this.drawCanvas()
-    this.bindTouchEvent()
   }
 
   hide() {
     this.obj.visible = false
+    if (this.scoreText) {
+      this.camera.remove(this.scoreText.instance)
+    }
     this.removeTouchEvent()
   }
 
@@ -23,57 +29,108 @@ export default class GameOverPage {
 
   initGameoverCanvas(options) {
     const aspect = window.innerHeight / window.innerWidth
-    this.region = [
-      (window.innerWidth - 200) / 2,
-      (window.innerWidth - 200) / 2 + 200,
-      (window.innerHeight - 100) / 2,
-      (window.innerHeight - 100) / 2 + 100
-    ]
     this.camera = options.scene.camera.instance
     this.canvas = document.createElement('canvas')
-    this.canvas.width = window.innerWidth
-    this.canvas.height = window.innerHeight
+    this.canvas.width = this.width
+    this.canvas.height = this.height
     this.texture = new THREE.CanvasTexture(this.canvas)
     this.material = new THREE.MeshBasicMaterial({ map: this.texture, transparent: true });
     this.geometry = new THREE.PlaneGeometry(sceneConf.frustumSize * 2, aspect * sceneConf.frustumSize * 2)
     this.obj = new THREE.Mesh(this.geometry, this.material)
-    this.obj.visible = false
-    this.obj.position.z = 20
+    this.obj.position.z = 80
     this.context = this.canvas.getContext('2d')
     this.obj.visible = false
     this.camera.add(this.obj)
   }
 
-  onTouchEnd = (e) => {
-    const pageX = e.changedTouches[0].pageX
-    const pageY = e.changedTouches[0].pageY
-    if (pageX > this.region[0] && pageX < this.region[1] && pageY > this.region[2] && pageY < this.region[3]) { // restart
-      this.callbacks.gameRestart()
-    }
-  }
-
-  bindTouchEvent() {
-    canvas.addEventListener('touchend', this.onTouchEnd)
-  }
-
   removeTouchEvent() {
-    canvas.removeEventListener('touchend', this.onTouchEnd)
+    canvas.removeEventListener('touchend', this.rePlayClick)
   }
 
   drawCanvas() {
-    // TODO: 绘制分数结算屏
-    // 清屏
-    this.context.clearRect(0, 0, window.innerWidth, window.innerHeight)
+    // 获取分数数据
+    this.highScore = window.localStorage.getItem("HighScore")
+    this.currentScore = window.localStorage.getItem("CurrentScore")
 
-    this.context.fillStyle = '#333'
-    this.context.fillRect((window.innerWidth - 200) / 2, (window.innerHeight - 100) / 2, 200, 100)
-    this.context.fillStyle = '#eee'
-    this.context.font = '20px Georgia'
+    // 清屏
+    this.context.clearRect(0, 0, this.width, this.height)
+    this.context.fillStyle = 'rgba(0, 0, 0, 0.5)'
+    this.context.fillRect(0, 0, this.width, this.height)
+
+    // 设置全局文字
+    this.context.font = "15px Microsoft YaHei";
+    this.context.fillStyle = "rgba(255,255,255, 0.8)"
+    this.context.textAlign = "center"
+
+
     if (this.newScore) {
-      this.context.fillText('历史最高分', (window.innerWidth - 200) / 2 + 50, (window.innerHeight - 100) / 2 + 55)
+      // 绘制历史最高分界面
+      let highScoreImg = wx.createImage()
+      highScoreImg.src = "res/images/high_score.png"
+      highScoreImg.onload = () => {
+        let scale = highScoreImg.height / highScoreImg.width
+        let width = Math.min(414, this.width * 0.8)
+        this.context.drawImage(
+          highScoreImg,
+          (this.width - width) / 2,
+          this.height * 0.11,
+          width,
+          width * scale
+        )
+        this.texture.needsUpdate = true
+      }
     } else {
-      this.context.fillText('不是历史最高分', (window.innerWidth - 200) / 2 + 50, (window.innerHeight - 100) / 2 + 55)
+      // 绘制非历史最高分
+      this.context.fillText("= 本次得分 =", this.width / 2, this.height * 0.2)
     }
+
+    // 绘制本次分数
+    this.scoreText = new ScoreText()
+    this.scoreText.init({
+      fillStyle: 0xffffff,
+      defaultText: this.currentScore.toString()
+    })
+    this.scoreText.instance.position.x = -2
+    this.scoreText.instance.position.y = (sceneConf.frustumSize * 2 * this.height / this.width) * 0.15
+    this.scoreText.instance.position.z = 81
+    this.camera.add(this.scoreText.instance)
+
+    // 绘制功能按钮
+    let replayBtn = wx.createImage()
+    replayBtn.src = 'res/images/replay.png'
+    replayBtn.onload = () => {
+      let scale = replayBtn.height / replayBtn.width
+      let dx = this.width * 0.25
+      let dy = this.height * 0.7
+      let dw = this.width * 0.5
+      let dh = this.width * 0.5 * scale
+      this.context.drawImage(replayBtn, dx, dy, dw, dh)
+      // 设定按钮点按区域
+      this.replayBtnRegin = {
+        left: dx,
+        right: dx + dw,
+        top: dy,
+        bottom: dy + dh
+      }
+      // 绑定事件
+      window.addEventListener("touchend", this.rePlayClick)
+      this.texture.needsUpdate = true
+    }
+
+    // 绘制历史最高分
+    this.context.fillText(
+      `历史最高分：${this.highScore}`,
+      this.width / 2,
+      this.height * 0.9
+    )
     this.texture.needsUpdate = true
+  }
+
+  rePlayClick = (e) => {
+    const x = e.changedTouches[0].pageX
+    const y = e.changedTouches[0].pageY
+    if (x > this.replayBtnRegin.left && x < this.replayBtnRegin.right && y > this.replayBtnRegin.top && y < this.replayBtnRegin.bottom) {
+      this.callbacks.gameRestart()
+    }
   }
 }
