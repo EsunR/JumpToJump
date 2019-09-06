@@ -280,7 +280,6 @@ export default class GamePage {
       const nextDiff = Math.pow(destination[0] - nextBlock.instance.position.x, 2) + Math.pow(destination[1] - nextBlock.instance.position.z, 2)
 
       // 首先检测小瓶会不会触碰到下一个 block 的顶部平面
-      console.log("Next Size ======");
       const nextPolygon = nextBlock.getVertices()
       let result1
       // 以射线法计算某一点是否在多边形内部
@@ -302,7 +301,6 @@ export default class GamePage {
       }
 
       // 如果没有触碰到下一个方块，则检测是否碰触到当前的方块
-      console.log("Current Size ======");
       const currentPolygon = currentBlock.getVertices()
       let result2
       if (utils.pointInPolygon(destination, currentPolygon)) {

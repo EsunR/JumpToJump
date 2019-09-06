@@ -64,7 +64,6 @@ export default class BaseBlock {
      z
     */
     // this.size 是来自继承该抽象类的普通类中的属性 
-    console.log("size:",this.size);
     vertices.push([centerPosition.x + this.size / 2, centerPosition.z + this.size / 2])
     vertices.push([centerPosition.x + this.size / 2, centerPosition.z - this.size / 2])
     vertices.push([centerPosition.x - this.size / 2, centerPosition.z + this.size / 2])

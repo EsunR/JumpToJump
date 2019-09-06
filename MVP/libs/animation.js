@@ -56,7 +56,6 @@ export function TweenAnimation(from, to, duration, type, callback) {
   const frameCount = duration * 1000 / 17
   let start = -1
 
-  const startTime = Date.now()
   let lastTime = Date.now()
   let tweenFn = Tween
   let typeArr = options.type.split(".")
