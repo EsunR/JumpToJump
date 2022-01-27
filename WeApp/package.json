@@ -4,7 +4,7 @@
   "description": "",
   "main": "game.js",
   "dependencies": {
-    "three": "^0.107.0"
+    "three": "^0.137.0"
   },
   "devDependencies": {},
   "scripts": {
